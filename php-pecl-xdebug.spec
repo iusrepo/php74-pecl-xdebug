@@ -1,10 +1,10 @@
 %global php_apiver  %((echo 0; php -i 2>/dev/null | sed -n 's/^PHP API => //p') | tail -1)
 %global php_extdir  %(php-config --extension-dir 2>/dev/null || echo "undefined")
-%define beta beta6
+%define beta RC1
 
 Name:           php-pecl-xdebug
 Version:        2.0.0
-Release:        0.1.%{beta}%{?dist}
+Release:        0.2.%{beta}%{?dist}
 Summary:        PECL package for debugging PHP scripts
 License:        PHP License
 Group:          Development/Languages
@@ -46,6 +46,9 @@ rm -rf %{buildroot}
 %{php_extdir}/xdebug.so
 
 %changelog
+* Sun Oct 29 2006 Christopher Stone <chris.stone@gmail.com> 2.0.0-0.2.RC1
+- Upstream sync
+
 * Wed Sep 06 2006 Christopher Stone <chris.stone@gmail.com> 2.0.0-0.1.beta6
 - Remove Provides php-xdebug
 - Fix Release
