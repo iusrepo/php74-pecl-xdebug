@@ -4,10 +4,10 @@
 
 Name:           php-pecl-xdebug
 Version:        2.0.0
-Release:        0.3.%{beta}%{?dist}
+Release:        0.4.%{beta}%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
-License:        PHP License
+License:        BSD
 Group:          Development/Languages
 URL:            http://pecl.php.net/package/xdebug
 Source0:        http://pecl.php.net/get/xdebug-%{version}%{beta}.tgz
@@ -29,21 +29,23 @@ of valuable debug information.
 %build
 phpize
 %configure --enable-xdebug
-make
+CFLAGS="$RPM_OPT_FLAGS" make
 
 
 %install
-rm -rf %{buildroot}
-make install INSTALL_ROOT=%{buildroot}
-mkdir -p %{buildroot}%{_sysconfdir}/php.d
-cat > %{buildroot}%{_sysconfdir}/php.d/xdebug.ini << 'EOF'
+rm -rf $RPM_BUILD_ROOT
+make install INSTALL_ROOT=$RPM_BUILD_ROOT
+
+# install config file
+install -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
+cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/xdebug.ini << 'EOF'
 ; Enable xdebug extension module
 zend_extension=%{php_extdir}/xdebug.so
 EOF
 
 
 %clean
-rm -rf %{buildroot}
+rm -rf $RPM_BUILD_ROOT
 
 
 %files
@@ -54,6 +56,11 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon Jan 29 2007 Christopher Stone <chris.stone@gmail.com> 2.0.0-0.4.RC2
+- Compile with $RPM_OPT_FLAGS
+- Use $RPM_BUILD_ROOT instead of %%{buildroot}
+- Fix license tag
+
 * Mon Jan 15 2007 Christopher Stone <chris.stone@gmail.com> 2.0.0-0.3.RC2
 - Upstream sync
 
