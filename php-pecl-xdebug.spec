@@ -4,18 +4,26 @@
 
 Name:           php-pecl-xdebug
 Version:        2.0.0
-Release:        0.4.%{beta}%{?dist}
+Release:        0.5.%{?beta}%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
 Group:          Development/Languages
 URL:            http://pecl.php.net/package/xdebug
-Source0:        http://pecl.php.net/get/xdebug-%{version}%{beta}.tgz
+Source0:        http://pecl.php.net/get/xdebug-%{version}%{?beta}.tgz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  php-devel
+Provides:       php-pecl(Xdebug) = %{version}
+
+%if %{?php_zend_api}0
+# for fedora >= 6
+Requires:       php(zend-abi) = %{php_zend_api}
+Requires:       php(api) = %{php_core_api}
+%else
+# for fedora <= 5
 Requires:       php-api = %{php_apiver}
-Provides:       php-pecl(Xdebug) = %{version}-%{release}
+%endif
 
 %description
 The Xdebug extension helps you debugging your script by providing a lot
@@ -23,16 +31,18 @@ of valuable debug information.
 
 
 %prep
-%setup -q -n xdebug-%{version}%{beta}
+%setup -qcn xdebug-%{version}%{?beta}
 
 
 %build
+cd xdebug-%{version}%{?beta}
 phpize
 %configure --enable-xdebug
 CFLAGS="$RPM_OPT_FLAGS" make
 
 
 %install
+cd xdebug-%{version}%{?beta}
 rm -rf $RPM_BUILD_ROOT
 make install INSTALL_ROOT=$RPM_BUILD_ROOT
 
@@ -43,6 +53,10 @@ cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/xdebug.ini << 'EOF'
 zend_extension=%{php_extdir}/xdebug.so
 EOF
 
+# install doc files
+install -d docs
+install -pm 644 Changelog CREDITS LICENSE NEWS README docs
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -50,12 +64,17 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc Changelog CREDITS LICENSE NEWS README
+%doc xdebug-%{version}%{?beta}/docs/*
 %config(noreplace) %{_sysconfdir}/php.d/xdebug.ini
 %{php_extdir}/xdebug.so
 
 
 %changelog
+* Sun Mar 11 2007 Christopher Stone <chris.stone@gmail.com> 2.0.0-0.5.RC2
+- Create directory to untar sources
+- Use new ABI check for FC6
+- Remove %%{release} from Provides
+
 * Mon Jan 29 2007 Christopher Stone <chris.stone@gmail.com> 2.0.0-0.4.RC2
 - Compile with $RPM_OPT_FLAGS
 - Use $RPM_BUILD_ROOT instead of %%{buildroot}
