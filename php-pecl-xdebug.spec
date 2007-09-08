@@ -1,16 +1,15 @@
 %global php_apiver  %((echo 0; php -i 2>/dev/null | sed -n 's/^PHP API => //p') | tail -1)
 %global php_extdir  %(php-config --extension-dir 2>/dev/null || echo "undefined")
-%define beta RC2
 
 Name:           php-pecl-xdebug
 Version:        2.0.0
-Release:        0.5.%{?beta}%{?dist}
+Release:        1%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
 Group:          Development/Languages
 URL:            http://pecl.php.net/package/xdebug
-Source0:        http://pecl.php.net/get/xdebug-%{version}%{?beta}.tgz
+Source0:        http://pecl.php.net/get/xdebug-%{version}.tgz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  php-devel
@@ -31,18 +30,18 @@ of valuable debug information.
 
 
 %prep
-%setup -qcn xdebug-%{version}%{?beta}
+%setup -qcn xdebug-%{version}
 
 
 %build
-cd xdebug-%{version}%{?beta}
+cd xdebug-%{version}
 phpize
 %configure --enable-xdebug
 CFLAGS="$RPM_OPT_FLAGS" make
 
 
 %install
-cd xdebug-%{version}%{?beta}
+cd xdebug-%{version}
 rm -rf $RPM_BUILD_ROOT
 make install INSTALL_ROOT=$RPM_BUILD_ROOT
 
@@ -64,12 +63,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc xdebug-%{version}%{?beta}/docs/*
+%doc xdebug-%{version}/docs/*
 %config(noreplace) %{_sysconfdir}/php.d/xdebug.ini
 %{php_extdir}/xdebug.so
 
 
 %changelog
+* Sat Sep 08 2007 Christopher Stone <chris.stone@gmail.com> 2.0.0-1
+- Upstream sync
+- Remove %%{?beta} tags
+
 * Sun Mar 11 2007 Christopher Stone <chris.stone@gmail.com> 2.0.0-0.5.RC2
 - Create directory to untar sources
 - Use new ABI check for FC6
