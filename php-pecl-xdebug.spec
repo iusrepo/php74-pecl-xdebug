@@ -1,9 +1,10 @@
 %global php_apiver  %((echo 0; php -i 2>/dev/null | sed -n 's/^PHP API => //p') | tail -1)
-%global php_extdir  %(php-config --extension-dir 2>/dev/null || echo "undefined")
+%{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
+%{!?php_extdir: %{expand: %%global php_extdir %(php-config --extension-dir)}}
 
 Name:           php-pecl-xdebug
 Version:        2.0.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -16,11 +17,10 @@ BuildRequires:  php-devel
 Provides:       php-pecl(Xdebug) = %{version}
 
 %if %{?php_zend_api}0
-# for fedora >= 6
 Requires:       php(zend-abi) = %{php_zend_api}
 Requires:       php(api) = %{php_core_api}
 %else
-# for fedora <= 5
+# for EL-5
 Requires:       php-api = %{php_apiver}
 %endif
 
@@ -31,6 +31,10 @@ of valuable debug information.
 
 %prep
 %setup -qcn xdebug-%{version}
+cd xdebug-%{version}
+
+# fix rpmlint warnings
+iconv -f iso8859-1 -t utf-8 Changelog > Changelog.conv && mv -f Changelog.conv Changelog
 
 
 %build
@@ -57,6 +61,20 @@ install -d docs
 install -pm 644 Changelog CREDITS LICENSE NEWS README docs
 
 
+%if 0%{?pecl_install:1}
+%post
+%{pecl_install} %{pecl_xmldir}/%{name}.xml >/dev/null || :
+%endif
+
+
+%if 0%{?pecl_uninstall:1}
+%postun
+if [ $1 -eq 0 ] ; then
+    %{pecl_uninstall} %{pecl_name} >/dev/null || :
+fi
+%endif
+
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -69,6 +87,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Sep 30 2007 Christopher Stone <chris.stone@gmail.com> 2.0.0-2
+- Update to latest standards
+- Fix encoding on Changelog
+
 * Sat Sep 08 2007 Christopher Stone <chris.stone@gmail.com> 2.0.0-1
 - Upstream sync
 - Remove %%{?beta} tags
