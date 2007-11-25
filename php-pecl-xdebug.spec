@@ -3,8 +3,8 @@
 %{!?php_extdir: %{expand: %%global php_extdir %(php-config --extension-dir)}}
 
 Name:           php-pecl-xdebug
-Version:        2.0.0
-Release:        2%{?dist}
+Version:        2.0.2
+Release:        1%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -87,6 +87,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Nov 25 2007 Christopher Stone <chris.stone@gmail.com> 2.0.2-1
+- Upstream sync
+
 * Sun Sep 30 2007 Christopher Stone <chris.stone@gmail.com> 2.0.0-2
 - Update to latest standards
 - Fix encoding on Changelog
