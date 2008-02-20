@@ -4,7 +4,7 @@
 
 Name:           php-pecl-xdebug
 Version:        2.0.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -87,6 +87,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Feb 20 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 2.0.2-2
+- Autorebuild for GCC 4.3
+
 * Sun Nov 25 2007 Christopher Stone <chris.stone@gmail.com> 2.0.2-1
 - Upstream sync
 
