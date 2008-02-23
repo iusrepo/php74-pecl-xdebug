@@ -2,9 +2,11 @@
 %{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
 %{!?php_extdir: %{expand: %%global php_extdir %(php-config --extension-dir)}}
 
+%define pecl_name xdebug
+
 Name:           php-pecl-xdebug
 Version:        2.0.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -13,7 +15,8 @@ URL:            http://pecl.php.net/package/xdebug
 Source0:        http://pecl.php.net/get/xdebug-%{version}.tgz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  php-devel
+BuildRequires:  php-devel php-pear >= 1:1.4.9-1.2
+BuildRequires:  libedit-devel automake
 Provides:       php-pecl(Xdebug) = %{version}
 
 %if %{?php_zend_api}0
@@ -31,6 +34,8 @@ of valuable debug information.
 
 %prep
 %setup -qcn xdebug-%{version}
+[ -f package2.xml ] || mv package.xml package2.xml
+mv package2.xml %{pecl_name}-%{version}/%{pecl_name}.xml
 cd xdebug-%{version}
 
 # fix rpmlint warnings
@@ -42,12 +47,22 @@ cd xdebug-%{version}
 phpize
 %configure --enable-xdebug
 CFLAGS="$RPM_OPT_FLAGS" make
+pushd debugclient
+cp %{_datadir}/automake*/depcomp .
+chmod +x configure
+%configure --with-libedit
+CFLAGS="$RPM_OPT_FLAGS" make
+popd
 
 
 %install
 cd xdebug-%{version}
 rm -rf $RPM_BUILD_ROOT
 make install INSTALL_ROOT=$RPM_BUILD_ROOT
+
+# install debugclient
+install -d $RPM_BUILD_ROOT%{_bindir}
+install -pm 755 debugclient/debugclient $RPM_BUILD_ROOT%{_bindir}
 
 # install config file
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
@@ -59,6 +74,10 @@ EOF
 # install doc files
 install -d docs
 install -pm 644 Changelog CREDITS LICENSE NEWS README docs
+
+# Install XML package description
+install -d $RPM_BUILD_ROOT%{pecl_xmldir}
+install -pm 644 %{pecl_name}.xml $RPM_BUILD_ROOT%{pecl_xmldir}/%{name}.xml
 
 
 %if 0%{?pecl_install:1}
@@ -84,9 +103,17 @@ rm -rf $RPM_BUILD_ROOT
 %doc xdebug-%{version}/docs/*
 %config(noreplace) %{_sysconfdir}/php.d/xdebug.ini
 %{php_extdir}/xdebug.so
+%{_bindir}/debugclient
+%{pecl_xmldir}/%{name}.xml
 
 
 %changelog
+* Fri Feb 22 2008 Christopher Stone <chris.stone@gmail.com> 2.0.2-3
+- %%define %%pecl_name to properly register package
+- Install xml package description
+- Add debugclient
+- Many thanks to Edward Rudd (eddie@omegaware.com) (bz #432681)
+
 * Wed Feb 20 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 2.0.2-2
 - Autorebuild for GCC 4.3
 
