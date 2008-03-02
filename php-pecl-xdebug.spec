@@ -6,7 +6,7 @@
 
 Name:           php-pecl-xdebug
 Version:        2.0.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -17,6 +17,8 @@ Source0:        http://pecl.php.net/get/xdebug-%{version}.tgz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  php-devel php-pear >= 1:1.4.9-1.2
 BuildRequires:  libedit-devel automake
+Requires(post): %{__pecl}
+Requires(postun): %{__pecl}
 Provides:       php-pecl(Xdebug) = %{version}
 
 %if %{?php_zend_api}0
@@ -108,6 +110,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Mar 02 2008 Christopher Stone <chris.stone@gmail.com> 2.0.2-4
+- Add %%{__pecl} to post/postun Requires
+
 * Fri Feb 22 2008 Christopher Stone <chris.stone@gmail.com> 2.0.2-3
 - %%define %%pecl_name to properly register package
 - Install xml package description
