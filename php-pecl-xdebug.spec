@@ -15,17 +15,21 @@ URL:            http://pecl.php.net/package/xdebug
 Source0:        http://pecl.php.net/get/xdebug-%{version}.tgz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  php-devel php-pear >= 1:1.4.9-1.2
-BuildRequires:  libedit-devel automake
+BuildRequires:  automake php-devel php-pear >= 1:1.4.9-1.2
+%if 0%{?fedora}
+BuildRequires:  libedit-devel
+%endif
 Requires(post): %{__pecl}
 Requires(postun): %{__pecl}
 Provides:       php-pecl(Xdebug) = %{version}
 
-%if %{?php_zend_api}0
+%if 0%{?php_zend_api}
+%define config_flags --with-libedit
 Requires:       php(zend-abi) = %{php_zend_api}
 Requires:       php(api) = %{php_core_api}
 %else
 # for EL-5
+%define config_flags --without-libedit
 Requires:       php-api = %{php_apiver}
 %endif
 
@@ -49,10 +53,12 @@ cd xdebug-%{version}
 phpize
 %configure --enable-xdebug
 CFLAGS="$RPM_OPT_FLAGS" make
+
+# Build debugclient
 pushd debugclient
 cp %{_datadir}/automake*/depcomp .
 chmod +x configure
-%configure --with-libedit
+%configure %{config_flags}
 CFLAGS="$RPM_OPT_FLAGS" make
 popd
 
