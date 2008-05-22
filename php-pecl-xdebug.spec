@@ -5,8 +5,8 @@
 %define pecl_name xdebug
 
 Name:           php-pecl-xdebug
-Version:        2.0.2
-Release:        4%{?dist}
+Version:        2.0.3
+Release:        1%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -16,20 +16,22 @@ Source0:        http://pecl.php.net/get/xdebug-%{version}.tgz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  automake php-devel php-pear >= 1:1.4.9-1.2
+
 %if 0%{?fedora}
+%define config_flags --with-libedit
 BuildRequires:  libedit-devel
+%else
+%define config_flags --without-libedit
 %endif
+
 Requires(post): %{__pecl}
 Requires(postun): %{__pecl}
 Provides:       php-pecl(Xdebug) = %{version}
 
 %if 0%{?php_zend_api}
-%define config_flags --with-libedit
 Requires:       php(zend-abi) = %{php_zend_api}
 Requires:       php(api) = %{php_core_api}
 %else
-# for EL-5
-%define config_flags --without-libedit
 Requires:       php-api = %{php_apiver}
 %endif
 
@@ -46,6 +48,7 @@ cd xdebug-%{version}
 
 # fix rpmlint warnings
 iconv -f iso8859-1 -t utf-8 Changelog > Changelog.conv && mv -f Changelog.conv Changelog
+chmod -x *.[ch]
 
 
 %build
@@ -116,6 +119,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu May 22 2008 Christopher Stone <chris.stone@gmail.com> 2.0.3-1
+- Upstream sync
+- Clean up libedit usage
+- Minor rpmlint fix
+
 * Sun Mar 02 2008 Christopher Stone <chris.stone@gmail.com> 2.0.2-4
 - Add %%{__pecl} to post/postun Requires
 
