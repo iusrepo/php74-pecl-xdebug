@@ -13,6 +13,7 @@ License:        BSD
 Group:          Development/Languages
 URL:            http://pecl.php.net/package/xdebug
 Source0:        http://pecl.php.net/get/xdebug-%{version}.tgz
+Patch0:         %{pecl_name}-2.0.3-codecoverage.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  automake php-devel php-pear >= 1:1.4.9-1.2
@@ -45,6 +46,7 @@ of valuable debug information.
 [ -f package2.xml ] || mv package.xml package2.xml
 mv package2.xml %{pecl_name}-%{version}/%{pecl_name}.xml
 cd xdebug-%{version}
+%patch0 -p1 -b .codecoverage~
 
 # fix rpmlint warnings
 iconv -f iso8859-1 -t utf-8 Changelog > Changelog.conv && mv -f Changelog.conv Changelog
@@ -121,6 +123,8 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Thu Oct 09 2008 Christopher Stone <chris.stone@gmail.com> 2.0.3-3
 - Revert last change
+- Add code coverage patch (bz #460348)
+- http://bugs.xdebug.org/bug_view_page.php?bug_id=0000344
 
 * Thu Oct 09 2008 Christopher Stone <chris.stone@gmail.com> 2.0.3-2
 - Add php-xml to Requires (bz #464758)

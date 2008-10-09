@@ -1,0 +1,29 @@
+diff -u xdebug-2.0.3-orig/xdebug_code_coverage.c xdebug-2.0.3/xdebug_code_coverage.c
+--- xdebug-2.0.3-orig/xdebug_code_coverage.c	2008-04-09 10:52:03.000000000 -0400
++++ xdebug-2.0.3/xdebug_code_coverage.c	2008-08-27 13:18:54.000000000 -0400
+@@ -133,7 +133,12 @@
+ 	) {
+ 		*jmp1 = position + 1;
+ #ifdef ZEND_ENGINE_2
+-		*jmp2 = ((long) opcode.op2.u.jmp_addr - (long) base_address) / sizeof(zend_op);
++		/* if opline_num is smaller than base_address, use it directly */
++		if ((long) opcode.op2.u.opline_num < (long) base_address) {
++			*jmp2 = opcode.op2.u.opline_num;
++		} else {
++			*jmp2 = ((long) opcode.op2.u.jmp_addr - (long) base_address) / sizeof(zend_op);
++		}
+ #else
+ 		*jmp2 = opcode.op1.u.opline_num;
+ #endif
+@@ -163,6 +168,11 @@
+ 	long jump_pos1 = -1;
+ 	long jump_pos2 = -1;
+ 
++	/* Cancel if position is bigger than the actual size */
++	if (position > opa->size) {
++		return;
++	}
++
+ 	/*(fprintf(stderr, "Branch analysis from position: %d\n", position);)*/
+ 	/* First we see if the branch has been visited, if so we bail out. */
+ 	if (xdebug_set_in(set, position)) {
