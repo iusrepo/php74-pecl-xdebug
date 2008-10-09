@@ -6,7 +6,7 @@
 
 Name:           php-pecl-xdebug
 Version:        2.0.3
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -121,10 +121,12 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Thu Oct 09 2008 Christopher Stone <chris.stone@gmail.com> 2.0.3-3
-- Revert last change
+* Thu Oct 09 2008 Christopher Stone <chris.stone@gmail.com> 2.0.3-4
 - Add code coverage patch (bz #460348)
 - http://bugs.xdebug.org/bug_view_page.php?bug_id=0000344
+
+* Thu Oct 09 2008 Christopher Stone <chris.stone@gmail.com> 2.0.3-3
+- Revert last change
 
 * Thu Oct 09 2008 Christopher Stone <chris.stone@gmail.com> 2.0.3-2
 - Add php-xml to Requires (bz #464758)
