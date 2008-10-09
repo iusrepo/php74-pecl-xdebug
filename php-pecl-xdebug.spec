@@ -6,7 +6,7 @@
 
 Name:           php-pecl-xdebug
 Version:        2.0.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -24,6 +24,7 @@ BuildRequires:  libedit-devel
 %define config_flags --without-libedit
 %endif
 
+Requires:       php-xml
 Requires(post): %{__pecl}
 Requires(postun): %{__pecl}
 Provides:       php-pecl(Xdebug) = %{version}
@@ -119,6 +120,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Oct 09 2008 Christopher Stone <chris.stone@gmail.com> 2.0.3-2
+- Add php-xml to Requires (bz #464758)
+
 * Thu May 22 2008 Christopher Stone <chris.stone@gmail.com> 2.0.3-1
 - Upstream sync
 - Clean up libedit usage
