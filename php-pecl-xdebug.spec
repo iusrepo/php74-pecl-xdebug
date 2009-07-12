@@ -5,8 +5,8 @@
 %define pecl_name xdebug
 
 Name:           php-pecl-xdebug
-Version:        2.0.3
-Release:        5%{?dist}
+Version:        2.0.4
+Release:        1%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -61,7 +61,7 @@ CFLAGS="$RPM_OPT_FLAGS" make
 
 # Build debugclient
 pushd debugclient
-cp %{_datadir}/automake*/depcomp .
+cp %{_datadir}/automake-1.??/depcomp .
 chmod +x configure
 %configure %{config_flags}
 CFLAGS="$RPM_OPT_FLAGS" make
@@ -121,6 +121,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Jul 12 2009 Remi Collet <Fedora@FamilleCollet.com> - 2.0.4-1
+- update to 2.0.4 (bugfix + Basic PHP 5.3 support)
+
 * Thu Feb 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.0.3-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
