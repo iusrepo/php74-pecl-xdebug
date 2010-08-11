@@ -5,7 +5,7 @@
 %define pecl_name xdebug
 
 Name:           php-pecl-xdebug
-Version:        2.0.5
+Version:        2.1.0
 Release:        1%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
@@ -13,7 +13,6 @@ License:        BSD
 Group:          Development/Languages
 URL:            http://pecl.php.net/package/xdebug
 Source0:        http://pecl.php.net/get/xdebug-%{version}.tgz
-Patch0:         %{pecl_name}-2.0.3-codecoverage.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  automake php-devel php-pear >= 1:1.4.9-1.2
@@ -42,11 +41,10 @@ of valuable debug information.
 
 
 %prep
-%setup -qcn xdebug-%{version}
+%setup -qc
 [ -f package2.xml ] || mv package.xml package2.xml
 mv package2.xml %{pecl_name}-%{version}/%{pecl_name}.xml
 cd xdebug-%{version}
-%patch0 -p1 -b .codecoverage~
 
 # fix rpmlint warnings
 iconv -f iso8859-1 -t utf-8 Changelog > Changelog.conv && mv -f Changelog.conv Changelog
@@ -57,14 +55,13 @@ chmod -x *.[ch]
 cd xdebug-%{version}
 phpize
 %configure --enable-xdebug
-CFLAGS="$RPM_OPT_FLAGS" make
+%{__make} %{?_smp_mflags}
 
 # Build debugclient
 pushd debugclient
-cp %{_datadir}/automake-1.??/depcomp .
-chmod +x configure
+#cp %{_datadir}/automake-1.??/depcomp .
 %configure %{config_flags}
-CFLAGS="$RPM_OPT_FLAGS" make
+%{__make} %{?_smp_mflags}
 popd
 
 
@@ -121,6 +118,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Jun 29 2010 Remi Collet <Fedora@FamilleCollet.com> - 2.1.0-1
+- update to 2.1.0
+
 * Mon Sep 14 2009 Christopher Stone <chris.stone@gmail.com> 2.0.5-1
 - Upstream sync
 
