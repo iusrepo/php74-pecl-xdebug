@@ -2,7 +2,7 @@
 %{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
 %{!?php_extdir: %{expand: %%global php_extdir %(php-config --extension-dir)}}
 
-%define pecl_name xdebug
+%global pecl_name xdebug
 
 Name:           php-pecl-xdebug
 Version:        2.1.0
