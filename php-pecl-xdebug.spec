@@ -6,7 +6,7 @@
 
 Name:           php-pecl-xdebug
 Version:        2.1.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -16,16 +16,14 @@ Source0:        http://pecl.php.net/get/xdebug-%{version}.tgz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  automake php-devel php-pear >= 1:1.4.9-1.2
-
-%if 0%{?fedora}
-%define config_flags --with-libedit
 BuildRequires:  libedit-devel
-%else
-%define config_flags --without-libedit
-%endif
 
+%if 0%{?pecl_install:1}
 Requires(post): %{__pecl}
+%endif
+%if 0%{?pecl_uninstall:1}
 Requires(postun): %{__pecl}
+%endif
 Provides:       php-pecl(Xdebug) = %{version}
 
 %if 0%{?php_zend_api}
@@ -35,6 +33,13 @@ Requires:       php(api) = %{php_core_api}
 Requires:       php-api = %{php_apiver}
 %endif
 
+
+%{?filter_setup:
+%filter_provides_in %{php_extdir}/.*\.so$
+%filter_setup
+}
+
+
 %description
 The Xdebug extension helps you debugging your script by providing a lot
 of valuable debug information.
@@ -42,9 +47,9 @@ of valuable debug information.
 
 %prep
 %setup -qc
-[ -f package2.xml ] || mv package.xml package2.xml
-mv package2.xml %{pecl_name}-%{version}/%{pecl_name}.xml
 cd xdebug-%{version}
+# package.xml is V1, package2.xml is V2
+mv ../package2.xml %{pecl_name}.xml
 
 # fix rpmlint warnings
 iconv -f iso8859-1 -t utf-8 Changelog > Changelog.conv && mv -f Changelog.conv Changelog
@@ -60,7 +65,7 @@ phpize
 # Build debugclient
 pushd debugclient
 #cp %{_datadir}/automake-1.??/depcomp .
-%configure %{config_flags}
+%configure --with-libedit
 %{__make} %{?_smp_mflags}
 popd
 
@@ -88,6 +93,15 @@ install -pm 644 Changelog CREDITS LICENSE NEWS README docs
 # Install XML package description
 install -d $RPM_BUILD_ROOT%{pecl_xmldir}
 install -pm 644 %{pecl_name}.xml $RPM_BUILD_ROOT%{pecl_xmldir}/%{name}.xml
+
+
+%check
+cd %{pecl_name}-%{version}
+# only check if build extension can be loaded
+%{_bindir}/php \
+    --no-php-ini \
+    --define zend_extension=modules/xdebug.so \
+    --modules | grep Xdebug
 
 
 %if 0%{?pecl_install:1}
@@ -118,6 +132,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sat Oct 23 2010 Remi Collet <Fedora@FamilleCollet.com> - 2.1.0-2
+- add filter_provides to avoid private-shared-object-provides xdebug.so
+- add %%check section (minimal load test)
+- always use libedit
+
 * Tue Jun 29 2010 Remi Collet <Fedora@FamilleCollet.com> - 2.1.0-1
 - update to 2.1.0
 
