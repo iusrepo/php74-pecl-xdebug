@@ -28,7 +28,7 @@ Requires(postun): %{__pecl}
 Provides:       php-pecl(Xdebug) = %{version}
 Provides:       php-pecl(Xdebug)%{?_isa} = %{version}
 
-%if 0%{?php_zend_api}
+%if 0%{?php_zend_api:1}
 Requires:       php(zend-abi) = %{php_zend_api}
 Requires:       php(api) = %{php_core_api}
 %else
