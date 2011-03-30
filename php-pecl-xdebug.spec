@@ -147,6 +147,9 @@ rm -rf $RPM_BUILD_ROOT
 - update to 2.1.1
 - patch reported version
 
+* Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
 * Sat Oct 23 2010 Remi Collet <Fedora@FamilleCollet.com> - 2.1.0-2
 - add filter_provides to avoid private-shared-object-provides xdebug.so
 - add %%check section (minimal load test)
