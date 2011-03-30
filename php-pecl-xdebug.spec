@@ -5,17 +5,18 @@
 %global pecl_name xdebug
 
 Name:           php-pecl-xdebug
-Version:        2.1.0
-Release:        2%{?dist}
+Version:        2.1.1
+Release:        1%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
 Group:          Development/Languages
 URL:            http://pecl.php.net/package/xdebug
-Source0:        http://pecl.php.net/get/xdebug-%{version}.tgz
+Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  automake php-devel php-pear >= 1:1.4.9-1.2
+BuildRequires:  php-pear  >= 1:1.4.9-1.2
+BuildRequires:  php-devel >= 5.1.0
 BuildRequires:  libedit-devel
 
 %if 0%{?pecl_install:1}
@@ -25,6 +26,7 @@ Requires(post): %{__pecl}
 Requires(postun): %{__pecl}
 %endif
 Provides:       php-pecl(Xdebug) = %{version}
+Provides:       php-pecl(Xdebug)%{?_isa} = %{version}
 
 %if 0%{?php_zend_api}
 Requires:       php(zend-abi) = %{php_zend_api}
@@ -47,7 +49,7 @@ of valuable debug information.
 
 %prep
 %setup -qc
-cd xdebug-%{version}
+cd %{pecl_name}-%{version}
 # package.xml is V1, package2.xml is V2
 mv ../package2.xml %{pecl_name}.xml
 
@@ -55,9 +57,18 @@ mv ../package2.xml %{pecl_name}.xml
 iconv -f iso8859-1 -t utf-8 Changelog > Changelog.conv && mv -f Changelog.conv Changelog
 chmod -x *.[ch]
 
+# http://bugs.xdebug.org/view.php?id=674
+sed -i -e "/XDEBUG_VERSION/s/2.1.2dev/%{version}/" php_xdebug.h
+
+# Check extension version
+ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
+if test "$ver" != "%{version}"; then
+   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}.
+   exit 1
+fi
 
 %build
-cd xdebug-%{version}
+cd %{pecl_name}-%{version}
 phpize
 %configure --enable-xdebug
 %{__make} %{?_smp_mflags}
@@ -71,8 +82,8 @@ popd
 
 
 %install
-cd xdebug-%{version}
-rm -rf $RPM_BUILD_ROOT
+cd %{pecl_name}-%{version}
+rm -rf $RPM_BUILD_ROOT docs
 make install INSTALL_ROOT=$RPM_BUILD_ROOT
 
 # install debugclient
@@ -81,14 +92,14 @@ install -pm 755 debugclient/debugclient $RPM_BUILD_ROOT%{_bindir}
 
 # install config file
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
-cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/xdebug.ini << 'EOF'
+cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/%{pecl_name}.ini << 'EOF'
 ; Enable xdebug extension module
-zend_extension=%{php_extdir}/xdebug.so
+zend_extension=%{php_extdir}/%{pecl_name}.so
 EOF
 
 # install doc files
-install -d docs
-install -pm 644 Changelog CREDITS LICENSE NEWS README docs
+install -d ../docs
+install -pm 644 Changelog CREDITS LICENSE NEWS README ../docs
 
 # Install XML package description
 install -d $RPM_BUILD_ROOT%{pecl_xmldir}
@@ -100,7 +111,7 @@ cd %{pecl_name}-%{version}
 # only check if build extension can be loaded
 %{_bindir}/php \
     --no-php-ini \
-    --define zend_extension=modules/xdebug.so \
+    --define zend_extension=modules/%{pecl_name}.so \
     --modules | grep Xdebug
 
 
@@ -124,14 +135,18 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc xdebug-%{version}/docs/*
-%config(noreplace) %{_sysconfdir}/php.d/xdebug.ini
-%{php_extdir}/xdebug.so
+%doc docs/*
+%config(noreplace) %{_sysconfdir}/php.d/%{pecl_name}.ini
+%{php_extdir}/%{pecl_name}.so
 %{_bindir}/debugclient
 %{pecl_xmldir}/%{name}.xml
 
 
 %changelog
+* Wed Mar 30 2011 Remi Collet <Fedora@FamilleCollet.com> - 2.1.1-1
+- update to 2.1.1
+- patch reported version
+
 * Sat Oct 23 2010 Remi Collet <Fedora@FamilleCollet.com> - 2.1.0-2
 - add filter_provides to avoid private-shared-object-provides xdebug.so
 - add %%check section (minimal load test)
