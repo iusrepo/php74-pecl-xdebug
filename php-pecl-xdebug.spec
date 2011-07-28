@@ -5,7 +5,7 @@
 %global pecl_name xdebug
 
 Name:           php-pecl-xdebug
-Version:        2.1.1
+Version:        2.1.2
 Release:        1%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
@@ -36,15 +36,30 @@ Requires:       php-api = %{php_apiver}
 %endif
 
 
-%{?filter_setup:
-%filter_provides_in %{php_extdir}/.*\.so$
-%filter_setup
-}
+# RPM 4.8
+%{?filter_provides_in: %filter_provides_in %{php_extdir}/.*\.so$}
+%{?filter_setup}
+# RPM 4.9
+%global __provides_exclude_from %{?__provides_exclude_from:%__provides_exclude_from|}%{php_extdir}/.*\\.so$
 
 
 %description
-The Xdebug extension helps you debugging your script by providing a lot
-of valuable debug information.
+The Xdebug extension helps you debugging your script by providing a lot of
+valuable debug information. The debug information that Xdebug can provide
+includes the following:
+
+* stack and function traces in error messages with:
+  o full parameter display for user defined functions
+  o function name, file name and line indications
+  o support for member functions
+* memory allocation
+* protection for infinite recursions
+
+Xdebug also provides:
+
+* profiling information for PHP scripts
+* code coverage analysis
+* capabilities to debug your scripts interactively with a debug client
 
 
 %prep
@@ -56,9 +71,6 @@ mv ../package2.xml %{pecl_name}.xml
 # fix rpmlint warnings
 iconv -f iso8859-1 -t utf-8 Changelog > Changelog.conv && mv -f Changelog.conv Changelog
 chmod -x *.[ch]
-
-# http://bugs.xdebug.org/view.php?id=674
-sed -i -e "/XDEBUG_VERSION/s/2.1.2dev/%{version}/" php_xdebug.h
 
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
@@ -75,7 +87,6 @@ phpize
 
 # Build debugclient
 pushd debugclient
-#cp %{_datadir}/automake-1.??/depcomp .
 %configure --with-libedit
 %{__make} %{?_smp_mflags}
 popd
@@ -143,6 +154,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Jul 28 2011 Remi Collet <Fedora@FamilleCollet.com> - 2.1.2-1
+- update to 2.1.2
+- fix provides filter for rpm 4.9
+- improved description
+
 * Wed Mar 30 2011 Remi Collet <Fedora@FamilleCollet.com> - 2.1.1-1
 - update to 2.1.1
 - patch reported version
