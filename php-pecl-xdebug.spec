@@ -6,7 +6,7 @@
 
 Name:           php-pecl-xdebug
 Version:        2.1.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
@@ -154,6 +154,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
 * Thu Jul 28 2011 Remi Collet <Fedora@FamilleCollet.com> - 2.1.2-1
 - update to 2.1.2
 - fix provides filter for rpm 4.9
