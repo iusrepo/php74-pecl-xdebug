@@ -3,16 +3,24 @@
 %{!?php_extdir: %{expand: %%global php_extdir %(php-config --extension-dir)}}
 
 %global pecl_name xdebug
+%global gitver d076740
+%global prever -dev
 
 Name:           php-pecl-xdebug
-Version:        2.1.2
-Release:        1%{?dist}
+Version:        2.2.0
+%if %{?gitver:1}
+Release:        0.1.git%{gitver}%{?dist}
+Source0:        derickr-xdebug-XDEBUG_2_1_2-193-gd076740.tar.gz
+BuildRequires:  libtool
+%else
+Release:        2%{?dist}
+Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
+%endif
 Summary:        PECL package for debugging PHP scripts
 
 License:        BSD
 Group:          Development/Languages
 URL:            http://pecl.php.net/package/xdebug
-Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  php-pear  >= 1:1.4.9-1.2
@@ -64,6 +72,15 @@ Xdebug also provides:
 
 %prep
 %setup -qc
+%if %{?gitver:1}
+cp derickr-xdebug-%{gitver}/package2.xml .
+mv derickr-xdebug-%{gitver} %{pecl_name}-%{version}
+
+# https://bugs.php.net/60330
+sed -i -e '/AC_PREREQ/s/2.60/2.59/' %{pecl_name}-%{version}/debugclient/configure.in
+grep AC_PREREQ %{pecl_name}-%{version}/debugclient/configure.in
+%endif
+
 cd %{pecl_name}-%{version}
 # package.xml is V1, package2.xml is V2
 mv ../package2.xml %{pecl_name}.xml
@@ -74,8 +91,8 @@ chmod -x *.[ch]
 
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
-if test "$ver" != "%{version}"; then
-   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}.
+if test "$ver" != "%{version}%{?prever}"; then
+   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}%{?prever}.
    exit 1
 fi
 
@@ -83,12 +100,14 @@ fi
 cd %{pecl_name}-%{version}
 phpize
 %configure --enable-xdebug
-%{__make} %{?_smp_mflags}
+make %{?_smp_mflags}
 
 # Build debugclient
 pushd debugclient
+# buildconf only required when build from git snapshot
+[ -f configure ] || ./buildconf
 %configure --with-libedit
-%{__make} %{?_smp_mflags}
+make %{?_smp_mflags}
 popd
 
 
@@ -110,7 +129,7 @@ EOF
 
 # install doc files
 install -d ../docs
-install -pm 644 Changelog CREDITS LICENSE NEWS README ../docs
+install -pm 644 CREDITS LICENSE NEWS README ../docs
 
 # Install XML package description
 install -d $RPM_BUILD_ROOT%{pecl_xmldir}
@@ -154,6 +173,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Nov 13 2011 Remi Collet <remi@fedoraproject.org> - 2.2.0-0.1.gitd076740
+- update to 2.2.0-dev, build against php 5.4
+
 * Thu Jul 28 2011 Remi Collet <Fedora@FamilleCollet.com> - 2.1.2-1
 - update to 2.1.2
 - fix provides filter for rpm 4.9
