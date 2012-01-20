@@ -176,6 +176,9 @@ rm -rf $RPM_BUILD_ROOT
 * Sun Nov 13 2011 Remi Collet <remi@fedoraproject.org> - 2.2.0-0.1.gitd076740
 - update to 2.2.0-dev, build against php 5.4
 
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
 * Thu Jul 28 2011 Remi Collet <Fedora@FamilleCollet.com> - 2.1.2-1
 - update to 2.1.2
 - fix provides filter for rpm 4.9
