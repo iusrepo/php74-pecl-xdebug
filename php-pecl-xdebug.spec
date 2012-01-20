@@ -173,7 +173,7 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Sun Nov 13 2011 Remi Collet <remi@fedoraproject.org> - 2.2.0-0.1.gitd076740
+* Fri Jan 20 2012 Remi Collet <remi@fedoraproject.org> - 2.2.0-0.1.gitd076740
 - update to 2.2.0-dev, build against php 5.4
 
 * Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1.2-2
