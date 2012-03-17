@@ -1,26 +1,21 @@
 %global php_apiver  %((echo 0; php -i 2>/dev/null | sed -n 's/^PHP API => //p') | tail -1)
 %{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
-%{!?php_extdir: %{expand: %%global php_extdir %(php-config --extension-dir)}}
 
 %global pecl_name xdebug
-%global gitver d076740
-%global prever -dev
+%global prever    RC1
+%global devver    rc1
 
 Name:           php-pecl-xdebug
-Version:        2.2.0
-%if %{?gitver:1}
-Release:        0.1.git%{gitver}%{?dist}
-Source0:        derickr-xdebug-XDEBUG_2_1_2-193-gd076740.tar.gz
-BuildRequires:  libtool
-%else
-Release:        2%{?dist}
-Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
-%endif
 Summary:        PECL package for debugging PHP scripts
+Version:        2.2.0
+Release:        0.2.%{prever}%{?dist}
+Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
-License:        BSD
+# The Xdebug License, version 1.01
+# (Based on "The PHP License", version 3.0)
+License:        PHP
 Group:          Development/Languages
-URL:            http://pecl.php.net/package/xdebug
+URL:            http://xdebug.org/
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  php-pear  >= 1:1.4.9-1.2
@@ -45,10 +40,10 @@ Requires:       php-api = %{php_apiver}
 
 
 # RPM 4.8
-%{?filter_provides_in: %filter_provides_in %{php_extdir}/.*\.so$}
+%{?filter_provides_in: %filter_provides_in %{_libdir}/.*\.so$}
 %{?filter_setup}
 # RPM 4.9
-%global __provides_exclude_from %{?__provides_exclude_from:%__provides_exclude_from|}%{php_extdir}/.*\\.so$
+%global __provides_exclude_from %{?__provides_exclude_from:%__provides_exclude_from|}%{_libdir}/.*\\.so$
 
 
 %description
@@ -72,18 +67,12 @@ Xdebug also provides:
 
 %prep
 %setup -qc
-%if %{?gitver:1}
-cp derickr-xdebug-%{gitver}/package2.xml .
-mv derickr-xdebug-%{gitver} %{pecl_name}-%{version}
+
+cd %{pecl_name}-%{version}%{?prever}
 
 # https://bugs.php.net/60330
-sed -i -e '/AC_PREREQ/s/2.60/2.59/' %{pecl_name}-%{version}/debugclient/configure.in
-grep AC_PREREQ %{pecl_name}-%{version}/debugclient/configure.in
-%endif
-
-cd %{pecl_name}-%{version}
-# package.xml is V1, package2.xml is V2
-mv ../package2.xml %{pecl_name}.xml
+sed -i -e '/AC_PREREQ/s/2.60/2.59/' debugclient/configure.in
+grep AC_PREREQ debugclient/configure.in
 
 # fix rpmlint warnings
 iconv -f iso8859-1 -t utf-8 Changelog > Changelog.conv && mv -f Changelog.conv Changelog
@@ -91,15 +80,22 @@ chmod -x *.[ch]
 
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
-if test "$ver" != "%{version}%{?prever}"; then
-   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}%{?prever}.
+if test "$ver" != "%{version}%{?devver}"; then
+   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}%{?devver}.
    exit 1
 fi
 
+cd ..
+
+%if 0%{?__ztsphp:1}
+cp -r %{pecl_name}-%{version}%{?prever} %{pecl_name}-zts
+%endif
+
+
 %build
-cd %{pecl_name}-%{version}
-phpize
-%configure --enable-xdebug
+cd %{pecl_name}-%{version}%{?prever}
+%{_bindir}/phpize
+%configure --enable-xdebug  --with-php-config=%{_bindir}/php-config
 make %{?_smp_mflags}
 
 # Build debugclient
@@ -110,39 +106,65 @@ pushd debugclient
 make %{?_smp_mflags}
 popd
 
+%if 0%{?__ztsphp:1}
+cd ../%{pecl_name}-zts
+%{_bindir}/zts-phpize
+%configure --enable-xdebug  --with-php-config=%{_bindir}/zts-php-config
+make %{?_smp_mflags}
+%endif
+
 
 %install
-cd %{pecl_name}-%{version}
-rm -rf $RPM_BUILD_ROOT docs
-make install INSTALL_ROOT=$RPM_BUILD_ROOT
+rm -rf %{buildroot}
+
+# install NTS extension
+make -C %{pecl_name}-%{version}%{?prever} \
+     install INSTALL_ROOT=%{buildroot}
 
 # install debugclient
-install -d $RPM_BUILD_ROOT%{_bindir}
-install -pm 755 debugclient/debugclient $RPM_BUILD_ROOT%{_bindir}
+install -Dpm 755 %{pecl_name}-%{version}%{?prever}/debugclient/debugclient \
+        %{buildroot}%{_bindir}/debugclient
+
+# install package registration file
+install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
 
 # install config file
-install -d $RPM_BUILD_ROOT%{_sysconfdir}/php.d
-cat > $RPM_BUILD_ROOT%{_sysconfdir}/php.d/%{pecl_name}.ini << 'EOF'
+install -d %{buildroot}%{_sysconfdir}/php.d
+cat > %{buildroot}%{_sysconfdir}/php.d/%{pecl_name}.ini << 'EOF'
 ; Enable xdebug extension module
 zend_extension=%{php_extdir}/%{pecl_name}.so
+
+; see http://xdebug.org/docs/all_settings
 EOF
 
-# install doc files
-install -d ../docs
-install -pm 644 CREDITS LICENSE NEWS README ../docs
+%if 0%{?__ztsphp:1}
+# Install ZTS extension
+make -C %{pecl_name}-zts \
+     install INSTALL_ROOT=%{buildroot}
 
-# Install XML package description
-install -d $RPM_BUILD_ROOT%{pecl_xmldir}
-install -pm 644 %{pecl_name}.xml $RPM_BUILD_ROOT%{pecl_xmldir}/%{name}.xml
+install -d %{buildroot}%{php_ztsinidir}
+cat > %{buildroot}%{php_ztsinidir}/%{pecl_name}.ini << 'EOF'
+; Enable xdebug extension module
+zend_extension=%{php_ztsextdir}/%{pecl_name}.so
+
+; see http://xdebug.org/docs/all_settings
+EOF
+%endif
 
 
 %check
-cd %{pecl_name}-%{version}
 # only check if build extension can be loaded
 %{_bindir}/php \
     --no-php-ini \
-    --define zend_extension=modules/%{pecl_name}.so \
+    --define zend_extension=%{pecl_name}-%{version}%{?prever}/modules/%{pecl_name}.so \
     --modules | grep Xdebug
+
+%if 0%{?__ztsphp:1}
+%{_bindir}/zts-php \
+    --no-php-ini \
+    --define zend_extension=%{pecl_name}-zts/modules/%{pecl_name}.so \
+    --modules | grep Xdebug
+%endif
 
 
 %if 0%{?pecl_install:1}
@@ -160,19 +182,29 @@ fi
 
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 
 %files
 %defattr(-,root,root,-)
-%doc docs/*
+%doc  %{pecl_name}-%{version}%{?prever}/{CREDITS,LICENSE,NEWS,README}
 %config(noreplace) %{_sysconfdir}/php.d/%{pecl_name}.ini
 %{php_extdir}/%{pecl_name}.so
 %{_bindir}/debugclient
 %{pecl_xmldir}/%{name}.xml
 
+%if 0%{?__ztsphp:1}
+%config(noreplace) %{php_ztsinidir}/%{pecl_name}.ini
+%{php_ztsextdir}/%{pecl_name}.so
+%endif
+
 
 %changelog
+* Sat Mar 17 2012 Remi Collet <remi@fedoraproject.org> - 2.2.0-0.2.RC1
+- update to 2.2.0RC1
+- enable ZTS build
+- fix License which is PHP, with some renaming
+
 * Fri Jan 20 2012 Remi Collet <remi@fedoraproject.org> - 2.2.0-0.1.gitd076740
 - update to 2.2.0-dev, build against php 5.4
 
