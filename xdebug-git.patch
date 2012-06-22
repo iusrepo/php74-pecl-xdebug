@@ -1,0 +1,21 @@
+From d0f753e714c8fea33f689d7d75b89455b615037d Mon Sep 17 00:00:00 2001
+From: Derick Rethans <github@derickrethans.nl>
+Date: Mon, 28 May 2012 09:04:38 +0100
+Subject: [PATCH] Fixed bug #838/bug #839/bug #840: Debugging static
+ properties crashes Xdebug.
+
+diff --git a/xdebug_var.c b/xdebug_var.c
+index 3da9481..5363433 100644
+--- a/xdebug_var.c
++++ b/xdebug_var.c
+@@ -922,6 +922,9 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp XDEB
+ 	xdebug_object_item *item;
+ 	zend_class_entry   *ce;
+ 
++	if ((zpp->flags & ZEND_ACC_STATIC) == 0) {
++		return;
++	}
+ 	merged = va_arg(args, HashTable*);
+ 	object_type = va_arg(args, int);
+ 	ce = va_arg(args, zend_class_entry*);
+
