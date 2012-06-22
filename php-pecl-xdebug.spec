@@ -6,8 +6,11 @@
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.2.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
+
+# Fixed bug #838/bug #839/bug #840: Debugging static properties crashes Xdebug
+Patch0:         xdebug-git.patch
 
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
@@ -67,6 +70,7 @@ Xdebug also provides:
 %setup -qc
 
 cd %{pecl_name}-%{version}%{?prever}
+%patch0 -p1 -b .orig
 
 # https://bugs.php.net/60330
 sed -i -e '/AC_PREREQ/s/2.60/2.59/' debugclient/configure.in
@@ -198,6 +202,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Jun 22 2012 Remi Collet <remi@fedoraproject.org> - 2.2.0-2
+- upstream patch for upstream bug #838/#839/#840
+
 * Wed May 09 2012 Remi Collet <remi@fedoraproject.org> - 2.2.0-1
 - Update to 2.2.0
 
