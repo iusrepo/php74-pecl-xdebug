@@ -2,12 +2,20 @@
 %{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
 
 %global pecl_name xdebug
+%global commit b1ce1e3ecc95c2e24d2df73cffce7e501df53215
+%global gitver %(c=%{commit}; echo ${c:0:7})
+%global prever dev
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.2.1
-Release:        3%{?dist}
+Version:        2.2.2
+Release:        0.1%{?gitver:.git%{gitver}}%{?dist}
+%if 0%{?gitver:1}
+Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{commit}/%{pecl_name}-%{version}-%{gitver}.tar.gz
+%else
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
+%endif
+
 
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
@@ -16,9 +24,10 @@ Group:          Development/Languages
 URL:            http://xdebug.org/
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  php-pear  >= 1:1.4.9-1.2
+BuildRequires:  php-pear
 BuildRequires:  php-devel >= 5.1.0
 BuildRequires:  libedit-devel
+BuildRequires:  libtool
 
 %if 0%{?pecl_install:1}
 Requires(post): %{__pecl}
@@ -26,6 +35,9 @@ Requires(post): %{__pecl}
 %if 0%{?pecl_uninstall:1}
 Requires(postun): %{__pecl}
 %endif
+
+Provides:       php-%{pecl_name} = %{version}
+Provides:       php-%{pecl_name}%{?_isa} = %{version}
 Provides:       php-pecl(Xdebug) = %{version}
 Provides:       php-pecl(Xdebug)%{?_isa} = %{version}
 
@@ -37,11 +49,9 @@ Requires:       php-api = %{php_apiver}
 %endif
 
 
-# RPM 4.8
+# Filter private shared
 %{?filter_provides_in: %filter_provides_in %{_libdir}/.*\.so$}
 %{?filter_setup}
-# RPM 4.9
-%global __provides_exclude_from %{?__provides_exclude_from:%__provides_exclude_from|}%{_libdir}/.*\\.so$
 
 
 %description
@@ -65,12 +75,13 @@ Xdebug also provides:
 
 %prep
 %setup -qc
+%if 0%{?gitver:1}
+sed -e '/release/s/2.2.1/%{version}%{?prever}/' \
+    %{pecl_name}-%{commit}/package.xml >package.xml
+mv %{pecl_name}-%{commit} %{pecl_name}-%{version}%{?prever}
+%endif
 
 cd %{pecl_name}-%{version}%{?prever}
-
-# https://bugs.php.net/60330
-sed -i -e '/AC_PREREQ/s/2.60/2.59/' debugclient/configure.in
-grep AC_PREREQ debugclient/configure.in
 
 # fix rpmlint warnings
 iconv -f iso8859-1 -t utf-8 Changelog > Changelog.conv && mv -f Changelog.conv Changelog
@@ -78,8 +89,8 @@ chmod -x *.[ch]
 
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
-if test "$ver" != "%{version}%{?devver}"; then
-   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}%{?devver}.
+if test "$ver" != "%{version}%{?prever}"; then
+   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}%{?prever}.
    exit 1
 fi
 
@@ -154,13 +165,13 @@ EOF
 # only check if build extension can be loaded
 %{_bindir}/php \
     --no-php-ini \
-    --define zend_extension=%{pecl_name}-%{version}%{?prever}/modules/%{pecl_name}.so \
+    --define zend_extension=%{buildroot}%{php_extdir}/%{pecl_name}.so \
     --modules | grep Xdebug
 
 %if 0%{?__ztsphp:1}
 %{_bindir}/zts-php \
     --no-php-ini \
-    --define zend_extension=%{pecl_name}-zts/modules/%{pecl_name}.so \
+    --define zend_extension=%{buildroot}%{php_ztsextdir}/%{pecl_name}.so \
     --modules | grep Xdebug
 %endif
 
@@ -198,6 +209,11 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Mar 22 2013 Remi Collet <rcollet@redhat.com> - 2.2.2-0.1.gitb1ce1e3
+- update to 2.2.2dev for php 5.5
+- rebuild for http://fedoraproject.org/wiki/Features/Php55
+- also provides php-xdebug
+
 * Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.2.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
