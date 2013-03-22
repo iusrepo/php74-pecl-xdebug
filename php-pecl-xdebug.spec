@@ -16,7 +16,6 @@ Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{commit}/%
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 %endif
 
-
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
 License:        PHP
