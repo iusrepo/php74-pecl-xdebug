@@ -19,6 +19,8 @@ BuildRequires:  php-pear
 BuildRequires:  php-devel
 BuildRequires:  libedit-devel
 BuildRequires:  libtool
+# Workaround for #924938
+BuildRequires:  perl-Carp
 
 Requires(post): %{__pecl}
 Requires(postun): %{__pecl}
