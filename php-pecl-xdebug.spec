@@ -2,19 +2,12 @@
 %{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
 
 %global pecl_name xdebug
-%global commit b1ce1e3ecc95c2e24d2df73cffce7e501df53215
-%global gitver %(c=%{commit}; echo ${c:0:7})
-%global prever dev
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.2.2
-Release:        0.1%{?gitver:.git%{gitver}}%{?dist}
-%if 0%{?gitver:1}
-Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{commit}/%{pecl_name}-%{version}-%{gitver}.tar.gz
-%else
+Release:        1%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
-%endif
 
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
@@ -22,31 +15,20 @@ License:        PHP
 Group:          Development/Languages
 URL:            http://xdebug.org/
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  php-pear
-BuildRequires:  php-devel >= 5.1.0
+BuildRequires:  php-devel
 BuildRequires:  libedit-devel
 BuildRequires:  libtool
 
-%if 0%{?pecl_install:1}
 Requires(post): %{__pecl}
-%endif
-%if 0%{?pecl_uninstall:1}
 Requires(postun): %{__pecl}
-%endif
+Requires:       php(zend-abi) = %{php_zend_api}
+Requires:       php(api) = %{php_core_api}
 
 Provides:       php-%{pecl_name} = %{version}
 Provides:       php-%{pecl_name}%{?_isa} = %{version}
 Provides:       php-pecl(Xdebug) = %{version}
 Provides:       php-pecl(Xdebug)%{?_isa} = %{version}
-
-%if 0%{?php_zend_api:1}
-Requires:       php(zend-abi) = %{php_zend_api}
-Requires:       php(api) = %{php_core_api}
-%else
-Requires:       php-api = %{php_apiver}
-%endif
-
 
 # Filter private shared
 %{?filter_provides_in: %filter_provides_in %{_libdir}/.*\.so$}
@@ -74,17 +56,7 @@ Xdebug also provides:
 
 %prep
 %setup -qc
-%if 0%{?gitver:1}
-sed -e '/release/s/2.2.1/%{version}%{?prever}/' \
-    %{pecl_name}-%{commit}/package.xml >package.xml
-mv %{pecl_name}-%{commit} %{pecl_name}-%{version}%{?prever}
-%endif
-
 cd %{pecl_name}-%{version}%{?prever}
-
-# fix rpmlint warnings
-iconv -f iso8859-1 -t utf-8 Changelog > Changelog.conv && mv -f Changelog.conv Changelog
-chmod -x *.[ch]
 
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
@@ -108,8 +80,8 @@ make %{?_smp_mflags}
 
 # Build debugclient
 pushd debugclient
-# buildconf only required when build from git snapshot
-[ -f configure ] || ./buildconf
+# buildconf required for aarch64 support
+./buildconf
 %configure --with-libedit
 make %{?_smp_mflags}
 popd
@@ -123,8 +95,6 @@ make %{?_smp_mflags}
 
 
 %install
-rm -rf %{buildroot}
-
 # install NTS extension
 make -C %{pecl_name}-%{version}%{?prever} \
      install INSTALL_ROOT=%{buildroot}
@@ -175,26 +145,17 @@ EOF
 %endif
 
 
-%if 0%{?pecl_install:1}
 %post
 %{pecl_install} %{pecl_xmldir}/%{name}.xml >/dev/null || :
-%endif
 
 
-%if 0%{?pecl_uninstall:1}
 %postun
 if [ $1 -eq 0 ] ; then
     %{pecl_uninstall} %{pecl_name} >/dev/null || :
 fi
-%endif
-
-
-%clean
-rm -rf %{buildroot}
 
 
 %files
-%defattr(-,root,root,-)
 %doc  %{pecl_name}-%{version}%{?prever}/{CREDITS,LICENSE,NEWS,README}
 %config(noreplace) %{_sysconfdir}/php.d/%{pecl_name}.ini
 %{php_extdir}/%{pecl_name}.so
@@ -208,6 +169,11 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Sun Mar 24 2013 Remi Collet <remi@fedoraproject.org> - 2.2.2-1
+- update to 2.2.2 (stable)
+- run buildconf for aarch64 support #926329
+- modernize spec
+
 * Fri Mar 22 2013 Remi Collet <rcollet@redhat.com> - 2.2.2-0.1.gitb1ce1e3
 - update to 2.2.2dev for php 5.5
 - rebuild for http://fedoraproject.org/wiki/Features/Php55
