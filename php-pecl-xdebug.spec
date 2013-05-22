@@ -1,11 +1,12 @@
-%global php_apiver  %((echo 0; php -i 2>/dev/null | sed -n 's/^PHP API => //p') | tail -1)
 %{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
+%{!?php_inidir: %{expand: %%global php_inidir  %{_sysconfdir}/php.d}}
 
 %global pecl_name xdebug
+%global with_zts  0%{?__ztsphp:1}
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.2.2
+Version:        2.2.3
 Release:        1%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
@@ -19,8 +20,6 @@ BuildRequires:  php-pear
 BuildRequires:  php-devel
 BuildRequires:  libedit-devel
 BuildRequires:  libtool
-# Workaround for #924938
-BuildRequires:  perl-Carp
 
 Requires(post): %{__pecl}
 Requires(postun): %{__pecl}
@@ -69,7 +68,7 @@ fi
 
 cd ..
 
-%if 0%{?__ztsphp:1}
+%if %{with_zts}
 cp -r %{pecl_name}-%{version}%{?prever} %{pecl_name}-zts
 %endif
 
@@ -88,7 +87,7 @@ pushd debugclient
 make %{?_smp_mflags}
 popd
 
-%if 0%{?__ztsphp:1}
+%if %{with_zts}
 cd ../%{pecl_name}-zts
 %{_bindir}/zts-phpize
 %configure --enable-xdebug  --with-php-config=%{_bindir}/zts-php-config
@@ -109,15 +108,15 @@ install -Dpm 755 %{pecl_name}-%{version}%{?prever}/debugclient/debugclient \
 install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
 
 # install config file
-install -d %{buildroot}%{_sysconfdir}/php.d
-cat > %{buildroot}%{_sysconfdir}/php.d/%{pecl_name}.ini << 'EOF'
+install -d %{buildroot}%{php_inidir}
+cat > %{buildroot}%{php_inidir}/%{pecl_name}.ini << 'EOF'
 ; Enable xdebug extension module
 zend_extension=%{php_extdir}/%{pecl_name}.so
 
 ; see http://xdebug.org/docs/all_settings
 EOF
 
-%if 0%{?__ztsphp:1}
+%if %{with_zts}
 # Install ZTS extension
 make -C %{pecl_name}-zts \
      install INSTALL_ROOT=%{buildroot}
@@ -139,7 +138,7 @@ EOF
     --define zend_extension=%{buildroot}%{php_extdir}/%{pecl_name}.so \
     --modules | grep Xdebug
 
-%if 0%{?__ztsphp:1}
+%if %{with_zts}
 %{_bindir}/zts-php \
     --no-php-ini \
     --define zend_extension=%{buildroot}%{php_ztsextdir}/%{pecl_name}.so \
@@ -159,18 +158,21 @@ fi
 
 %files
 %doc  %{pecl_name}-%{version}%{?prever}/{CREDITS,LICENSE,NEWS,README}
-%config(noreplace) %{_sysconfdir}/php.d/%{pecl_name}.ini
+%config(noreplace) %{php_inidir}/%{pecl_name}.ini
 %{php_extdir}/%{pecl_name}.so
 %{_bindir}/debugclient
 %{pecl_xmldir}/%{name}.xml
 
-%if 0%{?__ztsphp:1}
+%if %{with_zts}
 %config(noreplace) %{php_ztsinidir}/%{pecl_name}.ini
 %{php_ztsextdir}/%{pecl_name}.so
 %endif
 
 
 %changelog
+* Wed May 22 2013 Remi Collet <remi@fedoraproject.org> - 2.2.3-1
+- Update to 2.2.3
+
 * Sun Mar 24 2013 Remi Collet <remi@fedoraproject.org> - 2.2.2-1
 - update to 2.2.2 (stable)
 - run buildconf for aarch64 support #926329
