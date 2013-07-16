@@ -1,10 +1,16 @@
+%if 0%{?scl:1}
+%scl_package php-pecl-xdebug
+%else
+%global pkg_name %{name}
+%endif
+
 %{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
 %{!?php_inidir: %{expand: %%global php_inidir  %{_sysconfdir}/php.d}}
 
 %global pecl_name xdebug
 %global with_zts  0%{?__ztsphp:1}
 
-Name:           php-pecl-xdebug
+Name:           %{?scl_prefix}php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.2.3
 Release:        1%{?dist}
@@ -16,20 +22,20 @@ License:        PHP
 Group:          Development/Languages
 URL:            http://xdebug.org/
 
-BuildRequires:  php-pear
-BuildRequires:  php-devel
+BuildRequires:  %{?scl_prefix}php-pear
+BuildRequires:  %{?scl_prefix}php-devel
 BuildRequires:  libedit-devel
 BuildRequires:  libtool
 
 Requires(post): %{__pecl}
 Requires(postun): %{__pecl}
-Requires:       php(zend-abi) = %{php_zend_api}
-Requires:       php(api) = %{php_core_api}
+Requires:       %{?scl_prefix}php(zend-abi) = %{php_zend_api}
+Requires:       %{?scl_prefix}php(api) = %{php_core_api}
 
-Provides:       php-%{pecl_name} = %{version}
-Provides:       php-%{pecl_name}%{?_isa} = %{version}
-Provides:       php-pecl(Xdebug) = %{version}
-Provides:       php-pecl(Xdebug)%{?_isa} = %{version}
+Provides:       %{?scl_prefix}php-%{pecl_name} = %{version}
+Provides:       %{?scl_prefix}php-%{pecl_name}%{?_isa} = %{version}
+Provides:       %{?scl_prefix}php-pecl(Xdebug) = %{version}
+Provides:       %{?scl_prefix}php-pecl(Xdebug)%{?_isa} = %{version}
 
 # Filter private shared
 %{?filter_provides_in: %filter_provides_in %{_libdir}/.*\.so$}
@@ -109,7 +115,7 @@ install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
 
 # install config file
 install -d %{buildroot}%{php_inidir}
-cat > %{buildroot}%{php_inidir}/%{pecl_name}.ini << 'EOF'
+cat << 'EOF' | tee %{buildroot}%{php_inidir}/%{pecl_name}.ini
 ; Enable xdebug extension module
 zend_extension=%{php_extdir}/%{pecl_name}.so
 
@@ -122,7 +128,7 @@ make -C %{pecl_name}-zts \
      install INSTALL_ROOT=%{buildroot}
 
 install -d %{buildroot}%{php_ztsinidir}
-cat > %{buildroot}%{php_ztsinidir}/%{pecl_name}.ini << 'EOF'
+cat << 'EOF' | tee %{buildroot}%{php_ztsinidir}/%{pecl_name}.ini
 ; Enable xdebug extension module
 zend_extension=%{php_ztsextdir}/%{pecl_name}.so
 
@@ -170,6 +176,9 @@ fi
 
 
 %changelog
+* Tue Jul 16 2013 Remi Collet <remi@fedoraproject.org> - 2.2.3-2
+- adapt for SCL
+
 * Wed May 22 2013 Remi Collet <remi@fedoraproject.org> - 2.2.3-1
 - Update to 2.2.3
 
