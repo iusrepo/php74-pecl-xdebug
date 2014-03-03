@@ -1,19 +1,25 @@
-%if 0%{?scl:1}
-%scl_package php-pecl-xdebug
-%else
-%global pkg_name %{name}
-%endif
+# spec file for php-pecl-xdebug
+#
+# Copyright (c) 2010-2014 Remi Collet
+# Copyright (c) 2006-2009 Christopher Stone
+#
+# License: MIT
+# http://opensource.org/licenses/MIT
+#
+# Please, preserve the changelog entries
+#
 
-%{!?__pecl:     %{expand: %%global __pecl     %{_bindir}/pecl}}
-%{!?php_inidir: %{expand: %%global php_inidir  %{_sysconfdir}/php.d}}
+%{!?php_inidir:  %global php_inidir   %{_sysconfdir}/php.d}
+%{!?__pecl:      %global __pecl       %{_bindir}/pecl}
+%{!?__php:       %global __php        %{_bindir}/php}
 
 %global pecl_name xdebug
 %global with_zts  0%{?__ztsphp:1}
 
-Name:           %{?scl_prefix}php-pecl-xdebug
+Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.2.3
-Release:        3%{?dist}
+Version:        2.2.4
+Release:        1%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # The Xdebug License, version 1.01
@@ -22,24 +28,26 @@ License:        PHP
 Group:          Development/Languages
 URL:            http://xdebug.org/
 
-BuildRequires:  %{?scl_prefix}php-pear
-BuildRequires:  %{?scl_prefix}php-devel
+BuildRequires:  php-pear
+BuildRequires:  php-devel
 BuildRequires:  libedit-devel
 BuildRequires:  libtool
 
 Requires(post): %{__pecl}
 Requires(postun): %{__pecl}
-Requires:       %{?scl_prefix}php(zend-abi) = %{php_zend_api}
-Requires:       %{?scl_prefix}php(api) = %{php_core_api}
+Requires:       php(zend-abi) = %{php_zend_api}
+Requires:       php(api) = %{php_core_api}
 
-Provides:       %{?scl_prefix}php-%{pecl_name} = %{version}
-Provides:       %{?scl_prefix}php-%{pecl_name}%{?_isa} = %{version}
-Provides:       %{?scl_prefix}php-pecl(Xdebug) = %{version}
-Provides:       %{?scl_prefix}php-pecl(Xdebug)%{?_isa} = %{version}
+Provides:       php-%{pecl_name} = %{version}
+Provides:       php-%{pecl_name}%{?_isa} = %{version}
+Provides:       php-pecl(Xdebug) = %{version}
+Provides:       php-pecl(Xdebug)%{?_isa} = %{version}
 
+%if 0%{?fedora} < 20
 # Filter private shared
 %{?filter_provides_in: %filter_provides_in %{_libdir}/.*\.so$}
 %{?filter_setup}
+%endif
 
 
 %description
@@ -63,7 +71,8 @@ Xdebug also provides:
 
 %prep
 %setup -qc
-cd %{pecl_name}-%{version}%{?prever}
+mv %{pecl_name}-%{version}%{?prever} NTS
+cd NTS
 
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
@@ -75,14 +84,17 @@ fi
 cd ..
 
 %if %{with_zts}
-cp -r %{pecl_name}-%{version}%{?prever} %{pecl_name}-zts
+# Duplicate source tree for NTS / ZTS build
+cp -pr NTS ZTS
 %endif
 
 
 %build
-cd %{pecl_name}-%{version}%{?prever}
+cd NTS
 %{_bindir}/phpize
-%configure --enable-xdebug  --with-php-config=%{_bindir}/php-config
+%configure \
+    --enable-xdebug  \
+    --with-php-config=%{_bindir}/php-config
 make %{?_smp_mflags}
 
 # Build debugclient
@@ -94,20 +106,21 @@ make %{?_smp_mflags}
 popd
 
 %if %{with_zts}
-cd ../%{pecl_name}-zts
+cd ../ZTS
 %{_bindir}/zts-phpize
-%configure --enable-xdebug  --with-php-config=%{_bindir}/zts-php-config
+%configure \
+    --enable-xdebug  \
+    --with-php-config=%{_bindir}/zts-php-config
 make %{?_smp_mflags}
 %endif
 
 
 %install
 # install NTS extension
-make -C %{pecl_name}-%{version}%{?prever} \
-     install INSTALL_ROOT=%{buildroot}
+make -C NTS install INSTALL_ROOT=%{buildroot}
 
 # install debugclient
-install -Dpm 755 %{pecl_name}-%{version}%{?prever}/debugclient/debugclient \
+install -Dpm 755 NTS/debugclient/debugclient \
         %{buildroot}%{_bindir}/debugclient
 
 # install package registration file
@@ -124,8 +137,7 @@ EOF
 
 %if %{with_zts}
 # Install ZTS extension
-make -C %{pecl_name}-zts \
-     install INSTALL_ROOT=%{buildroot}
+make -C ZTS install INSTALL_ROOT=%{buildroot}
 
 install -d %{buildroot}%{php_ztsinidir}
 cat << 'EOF' | tee %{buildroot}%{php_ztsinidir}/%{pecl_name}.ini
@@ -135,6 +147,11 @@ zend_extension=%{php_ztsextdir}/%{pecl_name}.so
 ; see http://xdebug.org/docs/all_settings
 EOF
 %endif
+
+# Test & Documentation
+for i in $(grep 'role="doc"' package.xml | sed -e 's/^.*name="//;s/".*$//')
+do install -Dpm 644 NTS/$i %{buildroot}%{pecl_docdir}/%{pecl_name}/$i
+done
 
 
 %check
@@ -163,7 +180,7 @@ fi
 
 
 %files
-%doc  %{pecl_name}-%{version}%{?prever}/{CREDITS,LICENSE,NEWS,README}
+%doc %{pecl_docdir}/%{pecl_name}
 %config(noreplace) %{php_inidir}/%{pecl_name}.ini
 %{php_extdir}/%{pecl_name}.so
 %{_bindir}/debugclient
@@ -176,6 +193,11 @@ fi
 
 
 %changelog
+* Sun Mar 02 2014 Remi Collet <remi@fedoraproject.org> - 2.2.4-1
+- Update to 2.2.4 (stable)
+- move documentation in pecl_docdir
+- cleanups
+
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.2.3-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
