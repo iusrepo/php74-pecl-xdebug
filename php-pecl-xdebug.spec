@@ -15,11 +15,17 @@
 
 %global pecl_name xdebug
 %global with_zts  0%{?__ztsphp:1}
+# XDebug should be loaded after opcache
+%if 0%{?fedora} < 21
+%global ini_name  %{pecl_name}.ini
+%else
+%global ini_name  15-%{pecl_name}.ini
+%endif
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.2.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # The Xdebug License, version 1.01
@@ -128,9 +134,13 @@ install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
 
 # install config file
 install -d %{buildroot}%{php_inidir}
-cat << 'EOF' | tee %{buildroot}%{php_inidir}/%{pecl_name}.ini
+cat << 'EOF' | tee %{buildroot}%{php_inidir}/%{ini_name}
 ; Enable xdebug extension module
+%if "%{php_version}" > "5.5"
+zend_extension=%{pecl_name}.so
+%else
 zend_extension=%{php_extdir}/%{pecl_name}.so
+%endif
 
 ; see http://xdebug.org/docs/all_settings
 EOF
@@ -140,9 +150,13 @@ EOF
 make -C ZTS install INSTALL_ROOT=%{buildroot}
 
 install -d %{buildroot}%{php_ztsinidir}
-cat << 'EOF' | tee %{buildroot}%{php_ztsinidir}/%{pecl_name}.ini
+cat << 'EOF' | tee %{buildroot}%{php_ztsinidir}/%{ini_name}
 ; Enable xdebug extension module
+%if "%{php_version}" > "5.5"
+zend_extension=%{pecl_name}.so
+%else
 zend_extension=%{php_ztsextdir}/%{pecl_name}.so
+%endif
 
 ; see http://xdebug.org/docs/all_settings
 EOF
@@ -181,18 +195,22 @@ fi
 
 %files
 %doc %{pecl_docdir}/%{pecl_name}
-%config(noreplace) %{php_inidir}/%{pecl_name}.ini
+%config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
 %{_bindir}/debugclient
 %{pecl_xmldir}/%{name}.xml
 
 %if %{with_zts}
-%config(noreplace) %{php_ztsinidir}/%{pecl_name}.ini
+%config(noreplace) %{php_ztsinidir}/%{ini_name}
 %{php_ztsextdir}/%{pecl_name}.so
 %endif
 
 
 %changelog
+* Wed Apr 23 2014 Remi Collet <remi@fedoraproject.org> - 2.2.4-2
+- add numerical prefix to extension configuration file
+- drop uneeded full extension path
+
 * Sun Mar 02 2014 Remi Collet <remi@fedoraproject.org> - 2.2.4-1
 - Update to 2.2.4 (stable)
 - move documentation in pecl_docdir
