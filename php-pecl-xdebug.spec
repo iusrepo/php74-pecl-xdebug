@@ -16,7 +16,7 @@
 %global pecl_name xdebug
 %global with_zts  0%{?__ztsphp:1}
 # XDebug should be loaded after opcache
-%if 0%{?fedora} < 21
+%if "%{php_version}" < "5.6"
 %global ini_name  %{pecl_name}.ini
 %else
 %global ini_name  15-%{pecl_name}.ini
@@ -25,7 +25,7 @@
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.2.5
-Release:        2%{?dist}
+Release:        3%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # The Xdebug License, version 1.01
@@ -207,6 +207,9 @@ fi
 
 
 %changelog
+* Thu Jun 19 2014 Remi Collet <rcollet@redhat.com> - 2.2.5-3
+- rebuild for https://fedoraproject.org/wiki/Changes/Php56
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.2.5-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
