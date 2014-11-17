@@ -24,8 +24,8 @@
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.2.5
-Release:        4%{?dist}
+Version:        2.2.6
+Release:        1%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # The Xdebug License, version 1.01
@@ -162,7 +162,7 @@ zend_extension=%{php_ztsextdir}/%{pecl_name}.so
 EOF
 %endif
 
-# Test & Documentation
+# Documentation
 for i in $(grep 'role="doc"' package.xml | sed -e 's/^.*name="//;s/".*$//')
 do install -Dpm 644 NTS/$i %{buildroot}%{pecl_docdir}/%{pecl_name}/$i
 done
@@ -194,6 +194,7 @@ fi
 
 
 %files
+%{?_licensedir:%license NTS/LICENSE}
 %doc %{pecl_docdir}/%{pecl_name}
 %config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
@@ -207,6 +208,9 @@ fi
 
 
 %changelog
+* Sun Nov 16 2014 Remi Collet <remi@fedoraproject.org> - 2.2.6-1
+- Update to 2.2.6 (stable)
+
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.2.5-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
