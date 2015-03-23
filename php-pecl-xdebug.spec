@@ -24,7 +24,7 @@
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.3.1
+Version:        2.3.2
 Release:        1%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
@@ -196,10 +196,11 @@ fi
 %files
 %{?_licensedir:%license NTS/LICENSE}
 %doc %{pecl_docdir}/%{pecl_name}
-%config(noreplace) %{php_inidir}/%{ini_name}
-%{php_extdir}/%{pecl_name}.so
 %{_bindir}/debugclient
 %{pecl_xmldir}/%{name}.xml
+
+%config(noreplace) %{php_inidir}/%{ini_name}
+%{php_extdir}/%{pecl_name}.so
 
 %if %{with_zts}
 %config(noreplace) %{php_ztsinidir}/%{ini_name}
@@ -208,6 +209,9 @@ fi
 
 
 %changelog
+* Sun Mar 22 2015 Remi Collet <remi@fedoraproject.org> - 2.3.2-1
+- Update to 2.3.2
+
 * Wed Feb 25 2015 Remi Collet <remi@fedoraproject.org> - 2.3.1-1
 - Update to 2.3.1
 
