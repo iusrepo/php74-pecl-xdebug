@@ -25,7 +25,7 @@
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.3.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # https://github.com/xdebug/xdebug/pull/172
@@ -33,6 +33,8 @@ Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 Patch0:         %{pecl_name}-pr172.patch
 # https://github.com/xdebug/xdebug/pull/176
 Patch1:         %{pecl_name}-pr176.patch
+# https://github.com/xdebug/xdebug/pull/167
+Patch2:         %{pecl_name}-pr167.patch
 
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
@@ -86,6 +88,7 @@ Xdebug also provides:
 mv %{pecl_name}-%{version}%{?prever} NTS
 
 cd NTS
+%patch2 -p1 -b .pr167
 %patch0 -p1 -b .pr172
 %patch1 -p1 -b .pr176
 
@@ -218,6 +221,9 @@ fi
 
 
 %changelog
+* Fri May 29 2015 Remi Collet <remi@fedoraproject.org> - 2.3.2-3
+- add patch for exception code change (for phpunit)
+
 * Wed May 27 2015 Remi Collet <remi@fedoraproject.org> - 2.3.2-2
 - add patch for efree/str_efree in php 5.6
 - add patch for virtual_file_ex in 5.6 #1214111
