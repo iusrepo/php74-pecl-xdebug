@@ -25,7 +25,7 @@
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.3.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # https://github.com/xdebug/xdebug/pull/172
@@ -221,6 +221,9 @@ fi
 
 
 %changelog
+* Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.3.2-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Fri May 29 2015 Remi Collet <remi@fedoraproject.org> - 2.3.2-3
 - add patch for exception code change (for phpunit)
 
