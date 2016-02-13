@@ -1,6 +1,6 @@
 # Fedora spec file for php-pecl-xdebug
 #
-# Copyright (c) 2010-2015 Remi Collet
+# Copyright (c) 2010-2016 Remi Collet
 # Copyright (c) 2006-2009 Christopher Stone
 #
 # License: MIT
@@ -9,23 +9,15 @@
 # Please, preserve the changelog entries
 #
 
-%{!?php_inidir:  %global php_inidir   %{_sysconfdir}/php.d}
-%{!?__pecl:      %global __pecl       %{_bindir}/pecl}
-%{!?__php:       %global __php        %{_bindir}/php}
-
 %global pecl_name xdebug
 %global with_zts  0%{?__ztsphp:1}
 # XDebug should be loaded after opcache
-%if "%{php_version}" < "5.6"
-%global ini_name  %{pecl_name}.ini
-%else
 %global ini_name  15-%{pecl_name}.ini
-%endif
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.3.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # The Xdebug License, version 1.01
@@ -39,8 +31,6 @@ BuildRequires:  php-devel > 5.4
 BuildRequires:  libedit-devel
 BuildRequires:  libtool
 
-Requires(post): %{__pecl}
-Requires(postun): %{__pecl}
 Requires:       php(zend-abi) = %{php_zend_api}
 Requires:       php(api) = %{php_core_api}
 
@@ -48,12 +38,6 @@ Provides:       php-%{pecl_name} = %{version}
 Provides:       php-%{pecl_name}%{?_isa} = %{version}
 Provides:       php-pecl(Xdebug) = %{version}
 Provides:       php-pecl(Xdebug)%{?_isa} = %{version}
-
-%if 0%{?fedora} < 20 && 0%{?rhel} < 7
-# Filter private shared
-%{?filter_provides_in: %filter_provides_in %{_libdir}/.*\.so$}
-%{?filter_setup}
-%endif
 
 
 %description
@@ -137,11 +121,7 @@ install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
 install -d %{buildroot}%{php_inidir}
 cat << 'EOF' | tee %{buildroot}%{php_inidir}/%{ini_name}
 ; Enable xdebug extension module
-%if "%{php_version}" > "5.5"
 zend_extension=%{pecl_name}.so
-%else
-zend_extension=%{php_extdir}/%{pecl_name}.so
-%endif
 
 ; see http://xdebug.org/docs/all_settings
 EOF
@@ -153,11 +133,7 @@ make -C ZTS install INSTALL_ROOT=%{buildroot}
 install -d %{buildroot}%{php_ztsinidir}
 cat << 'EOF' | tee %{buildroot}%{php_ztsinidir}/%{ini_name}
 ; Enable xdebug extension module
-%if "%{php_version}" > "5.5"
 zend_extension=%{pecl_name}.so
-%else
-zend_extension=%{php_ztsextdir}/%{pecl_name}.so
-%endif
 
 ; see http://xdebug.org/docs/all_settings
 EOF
@@ -184,18 +160,8 @@ done
 %endif
 
 
-%post
-%{pecl_install} %{pecl_xmldir}/%{name}.xml >/dev/null || :
-
-
-%postun
-if [ $1 -eq 0 ] ; then
-    %{pecl_uninstall} %{pecl_name} >/dev/null || :
-fi
-
-
 %files
-%{?_licensedir:%license NTS/LICENSE}
+%license NTS/LICENSE
 %doc %{pecl_docdir}/%{pecl_name}
 %{_bindir}/debugclient
 %{pecl_xmldir}/%{name}.xml
@@ -210,6 +176,10 @@ fi
 
 
 %changelog
+* Sat Feb 13 2016 Remi Collet <remi@fedoraproject.org> - 2.3.3-3
+- drop scriptlets (replaced by file triggers in php-pear)
+- cleanup
+
 * Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 2.3.3-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
