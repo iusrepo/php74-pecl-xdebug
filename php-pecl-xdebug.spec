@@ -17,7 +17,7 @@
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.4.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # The Xdebug License, version 1.01
@@ -178,6 +178,9 @@ done
 
 
 %changelog
+* Mon Jun 27 2016 Remi Collet <remi@fedoraproject.org> - 2.4.0-2
+- rebuild for https://fedoraproject.org/wiki/Changes/php70
+
 * Tue Mar  8 2016 Remi Collet <remi@fedoraproject.org> - 2.4.0-1
 - update to 2.4.0
 
