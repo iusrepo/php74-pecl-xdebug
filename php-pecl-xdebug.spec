@@ -13,11 +13,12 @@
 %global with_zts  0%{?__ztsphp:1}
 # XDebug should be loaded after opcache
 %global ini_name  15-%{pecl_name}.ini
+%global prever    RC1
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.4.1
-Release:        1%{?dist}
+Version:        2.5.0
+Release:        0.1.%{prever}%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # The Xdebug License, version 1.01
@@ -27,7 +28,7 @@ Group:          Development/Languages
 URL:            http://xdebug.org/
 
 BuildRequires:  php-pear  > 1.9.1
-BuildRequires:  php-devel > 5.4
+BuildRequires:  php-devel > 5.5
 BuildRequires:  libedit-devel
 BuildRequires:  libtool
 
@@ -69,7 +70,7 @@ cd NTS
 
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
-if test "$ver" != "%{version}%{?prever}"; then
+if test "$ver" != "%{version}%{?prever:rc1}"; then
    : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}%{?prever}.
    exit 1
 fi
@@ -178,6 +179,9 @@ done
 
 
 %changelog
+* Mon Nov 14 2016 Remi Collet <remi@fedoraproject.org> - 2.5.0-0.1.RC1
+- update to 2.5.0RC1 for PHP 7.1
+
 * Tue Aug  2 2016 Remi Collet <remi@fedoraproject.org> - 2.4.1-1
 - update to 2.4.1
 
