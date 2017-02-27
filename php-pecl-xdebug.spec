@@ -1,6 +1,6 @@
 # Fedora spec file for php-pecl-xdebug
 #
-# Copyright (c) 2010-2016 Remi Collet
+# Copyright (c) 2010-2017 Remi Collet
 # Copyright (c) 2006-2009 Christopher Stone
 #
 # License: MIT
@@ -17,8 +17,8 @@
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.5.0
-Release:        2%{?dist}
+Version:        2.5.1
+Release:        1%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # The Xdebug License, version 1.01
@@ -179,6 +179,9 @@ done
 
 
 %changelog
+* Mon Feb 27 2017 Remi Collet <remi@fedoraproject.org> - 2.5.1-1
+- update to 2.5.1
+
 * Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
