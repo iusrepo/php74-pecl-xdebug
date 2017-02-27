@@ -18,7 +18,7 @@
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.5.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
 # The Xdebug License, version 1.01
@@ -82,6 +82,13 @@ cd ..
 cp -pr NTS ZTS
 %endif
 
+cat << 'EOF' | tee %{ini_name}
+; Enable xdebug extension module
+zend_extension=%{pecl_name}.so
+
+EOF
+sed -e '1d' NTS/%{pecl_name}.ini >>%{ini_name}
+
 
 %build
 cd NTS
@@ -121,25 +128,13 @@ install -Dpm 755 NTS/debugclient/debugclient \
 install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
 
 # install config file
-install -d %{buildroot}%{php_inidir}
-cat << 'EOF' | tee %{buildroot}%{php_inidir}/%{ini_name}
-; Enable xdebug extension module
-zend_extension=%{pecl_name}.so
-
-; see http://xdebug.org/docs/all_settings
-EOF
+install -Dpm 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
 
 %if %{with_zts}
 # Install ZTS extension
 make -C ZTS install INSTALL_ROOT=%{buildroot}
 
-install -d %{buildroot}%{php_ztsinidir}
-cat << 'EOF' | tee %{buildroot}%{php_ztsinidir}/%{ini_name}
-; Enable xdebug extension module
-zend_extension=%{pecl_name}.so
-
-; see http://xdebug.org/docs/all_settings
-EOF
+install -Dpm 644 %{ini_name} %{buildroot}%{php_ztsinidir}/%{ini_name}
 %endif
 
 # Documentation
@@ -179,6 +174,9 @@ done
 
 
 %changelog
+* Mon Feb 27 2017 Remi Collet <remi@fedoraproject.org> - 2.5.1-2
+- use uptream provided configuration with all settings
+
 * Mon Feb 27 2017 Remi Collet <remi@fedoraproject.org> - 2.5.1-1
 - update to 2.5.1
 
