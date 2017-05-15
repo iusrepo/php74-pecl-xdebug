@@ -13,11 +13,10 @@
 %global with_zts  0%{?__ztsphp:1}
 # XDebug should be loaded after opcache
 %global ini_name  15-%{pecl_name}.ini
-#global prever    RC1
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.5.3
+Version:        2.5.4
 Release:        1%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
@@ -174,6 +173,9 @@ done
 
 
 %changelog
+* Mon May 15 2017 Remi Collet <remi@remirepo.net> - 2.5.4-1
+- update to 2.5.4
+
 * Mon Apr 24 2017 Remi Collet <remi@remirepo.net> - 2.5.3-1
 - update to 2.5.3
 
