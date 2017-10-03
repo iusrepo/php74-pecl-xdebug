@@ -22,7 +22,7 @@ Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.6.0
 %if 0%{?gh_date:1}
-Release:        0.1.%{gh_date}.%{gh_short}%{?dist}%{!?scl:%{!?nophptag:%(%{__php} -r 'echo ".".PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')}}
+Release:        0.1.%{gh_date}.%{gh_short}%{?dist}
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{version}%{?prever}-%{gh_short}.tar.gz
 %else
 Release:        3%{?dist}
