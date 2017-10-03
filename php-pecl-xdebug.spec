@@ -10,15 +10,24 @@
 #
 
 %global pecl_name xdebug
-%global with_zts  0%{?__ztsphp:1}
+%global with_zts  0%{!?_without_zts:%{?__ztsphp:1}}
 # XDebug should be loaded after opcache
 %global ini_name  15-%{pecl_name}.ini
 
+%global gh_commit 9da805ce2a7ec32ff6e7db1ca43cca64811753a5
+%global gh_short  %(c=%{gh_commit}; echo ${c:0:7})
+%global gh_date   20170925
+
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.5.5
+Version:        2.6.0
+%if 0%{?gh_date:1}
+Release:        0.1.%{gh_date}.%{gh_short}%{?dist}%{!?scl:%{!?nophptag:%(%{__php} -r 'echo ".".PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')}}
+Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{version}%{?prever}-%{gh_short}.tar.gz
+%else
 Release:        3%{?dist}
 Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
+%endif
 
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
@@ -61,7 +70,18 @@ Xdebug also provides:
 
 %prep
 %setup -qc
+%if 0%{?gh_date:1}
+mv %{pecl_name}-%{gh_commit} NTS
+%{__php} -r '
+  $pkg = simplexml_load_file("NTS/package.xml");
+  $pkg->date = substr("%{gh_date}",0,4)."-".substr("%{gh_date}",4,2)."-".substr("%{gh_date}",6,2);
+  $pkg->version->release = "%{version}dev";
+  $pkg->stability->release = "devel";
+  $pkg->asXML("package.xml");
+'
+%else
 mv %{pecl_name}-%{version}%{?prever} NTS
+%endif
 
 sed -e '/LICENSE/s/role="doc"/role="src"/' -i package.xml
 
@@ -69,8 +89,8 @@ cd NTS
 
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
-if test "$ver" != "%{version}%{?prever:rc1}"; then
-   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}%{?prever}.
+if test "$ver" != "%{version}%{?prever}%{?gh_date:-dev}"; then
+   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}%{?prever}%{?gh_date:-dev}.
    exit 1
 fi
 
@@ -138,7 +158,9 @@ install -Dpm 644 %{ini_name} %{buildroot}%{php_ztsinidir}/%{ini_name}
 
 # Documentation
 for i in $(grep 'role="doc"' package.xml | sed -e 's/^.*name="//;s/".*$//')
-do install -Dpm 644 NTS/$i %{buildroot}%{pecl_docdir}/%{pecl_name}/$i
+do
+  [ -f NTS/contrib/$i ] && j=contrib/$i || j=$i
+  install -Dpm 644 NTS/$j %{buildroot}%{pecl_docdir}/%{pecl_name}/$j
 done
 
 
@@ -173,6 +195,9 @@ done
 
 
 %changelog
+* Tue Oct  3 2017 Remi Collet <remi@remirepo.net> - 2.6.0-0.1.20170925.9da805c
+- update to 2.6.0-dev for PHP 7.2
+
 * Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2.5.5-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
