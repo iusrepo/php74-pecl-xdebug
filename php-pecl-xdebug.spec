@@ -9,20 +9,21 @@
 # Please, preserve the changelog entries
 #
 
-%global pecl_name xdebug
-%global with_zts  0%{!?_without_zts:%{?__ztsphp:1}}
+%global pecl_name  xdebug
+%global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
 # XDebug should be loaded after opcache
-%global ini_name  15-%{pecl_name}.ini
+%global ini_name   15-%{pecl_name}.ini
+%global with_tests 0%{!?_without_tests:1}
 
-%global gh_commit 9da805ce2a7ec32ff6e7db1ca43cca64811753a5
-%global gh_short  %(c=%{gh_commit}; echo ${c:0:7})
-%global gh_date   20170925
+%global gh_commit  33ed33df6645aa08cbcfc793f5633f7bd8e68643
+%global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
+%global gh_date    20171018
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.6.0
 %if 0%{?gh_date:1}
-Release:        0.1.%{gh_date}.%{gh_short}%{?dist}
+Release:        0.2.%{gh_date}.%{gh_short}%{?dist}
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{version}%{?prever}-%{gh_short}.tar.gz
 %else
 Release:        3%{?dist}
@@ -36,7 +37,8 @@ Group:          Development/Languages
 URL:            http://xdebug.org/
 
 BuildRequires:  php-pear  > 1.9.1
-BuildRequires:  php-devel > 5.5
+BuildRequires:  php-devel > 7
+BuildRequires:  php-simplexml
 BuildRequires:  libedit-devel
 BuildRequires:  libtool
 
@@ -86,14 +88,12 @@ mv %{pecl_name}-%{version}%{?prever} NTS
 sed -e '/LICENSE/s/role="doc"/role="src"/' -i package.xml
 
 cd NTS
-
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
 if test "$ver" != "%{version}%{?prever}%{?gh_date:-dev}"; then
    : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}%{?prever}%{?gh_date:-dev}.
    exit 1
 fi
-
 cd ..
 
 %if %{with_zts}
@@ -165,6 +165,14 @@ done
 
 
 %check
+# Shared needed extensions
+modules=""
+for mod in simplexml; do
+  if [ -f %{php_extdir}/${mod}.so ]; then
+    modules="$modules -d extension=${mod}.so"
+  fi
+done
+
 # only check if build extension can be loaded
 %{_bindir}/php \
     --no-php-ini \
@@ -176,6 +184,25 @@ done
     --no-php-ini \
     --define zend_extension=%{buildroot}%{php_ztsextdir}/%{pecl_name}.so \
     --modules | grep Xdebug
+%endif
+
+%if %{with_tests}
+cd NTS
+%if "%{php_version}" > "7.2"
+# Know as failed upstream (travis)
+rm tests/bug01258-php7.phpt
+%endif
+
+: Upstream test suite NTS extension
+# bug00886 is marked as slow as it uses a lot of disk space
+SKIP_SLOW_TESTS=1 \
+TEST_PHP_EXECUTABLE=%{_bindir}/php \
+TEST_PHP_ARGS="-n $modules -d zend_extension=%{buildroot}%{php_extdir}/%{pecl_name}.so -d xdebug.auto_trace=0" \
+NO_INTERACTION=1 \
+REPORT_EXIT_STATUS=1 \
+%{__php} -n run-tests.php --show-diff
+%else
+: Test suite disabled
 %endif
 
 
@@ -195,6 +222,10 @@ done
 
 
 %changelog
+* Wed Oct 18 2017 Remi Collet <remi@remirepo.net> - 2.6.0-0.2.20171018.33ed33d
+- refresh with upstream fix for big endian
+- enable test suite
+
 * Tue Oct  3 2017 Remi Collet <remi@remirepo.net> - 2.6.0-0.1.20170925.9da805c
 - update to 2.6.0-dev for PHP 7.2
 
