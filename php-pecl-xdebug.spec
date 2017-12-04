@@ -15,20 +15,24 @@
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 
-%global gh_commit  33ed33df6645aa08cbcfc793f5633f7bd8e68643
+%global gh_commit  bb90b66e8461b86aa25a9545cd99d476e0283b32
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
-%global gh_date    20171018
+#global gh_date    20171018
+%global prever     alpha1
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.6.0
+%if 0%{?prever:1}
+Release:        0.3.%{prever}%{?dist}
+%else
 %if 0%{?gh_date:1}
 Release:        0.2.%{gh_date}.%{gh_short}%{?dist}
-Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{version}%{?prever}-%{gh_short}.tar.gz
 %else
 Release:        3%{?dist}
-Source0:        http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 %endif
+%endif
+Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{version}%{?prever}-%{gh_short}.tar.gz
 
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
@@ -72,8 +76,9 @@ Xdebug also provides:
 
 %prep
 %setup -qc
-%if 0%{?gh_date:1}
 mv %{pecl_name}-%{gh_commit} NTS
+
+%if 0%{?gh_date:1}
 %{__php} -r '
   $pkg = simplexml_load_file("NTS/package.xml");
   $pkg->date = substr("%{gh_date}",0,4)."-".substr("%{gh_date}",4,2)."-".substr("%{gh_date}",6,2);
@@ -82,7 +87,7 @@ mv %{pecl_name}-%{gh_commit} NTS
   $pkg->asXML("package.xml");
 '
 %else
-mv %{pecl_name}-%{version}%{?prever} NTS
+mv NTS/package.xml .
 %endif
 
 sed -e '/LICENSE/s/role="doc"/role="src"/' -i package.xml
@@ -222,6 +227,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Sun Dec  3 2017 Remi Collet <remi@remirepo.net> - 2.6.0-0.3.alpha1
+- update to 2.6.0alpha1
+
 * Wed Oct 18 2017 Remi Collet <remi@remirepo.net> - 2.6.0-0.2.20171018.33ed33d
 - refresh with upstream fix for big endian
 - enable test suite
