@@ -1,6 +1,6 @@
 # Fedora spec file for php-pecl-xdebug
 #
-# Copyright (c) 2010-2017 Remi Collet
+# Copyright (c) 2010-2018 Remi Collet
 # Copyright (c) 2006-2009 Christopher Stone
 #
 # License: MIT
@@ -15,16 +15,16 @@
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 
-%global gh_commit  f7db5b771a63d338e4af0c5b123d4084d2fd49cd
+%global gh_commit  e53e2073568dc26a74b73479bff4e3fd88fe3ab2
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 #global gh_date    20171018
-%global prever     beta1
+%global prever     RC2
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.6.0
 %if 0%{?prever:1}
-Release:        0.4.%{prever}%{?dist}
+Release:        0.5.%{prever}%{?dist}
 %else
 %if 0%{?gh_date:1}
 Release:        0.2.%{gh_date}.%{gh_short}%{?dist}
@@ -227,6 +227,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Tue Jan 23 2018 Remi Collet <remi@remirepo.net> - 2.6.0-0.5.RC2
+- update to 2.6.0RC2
+
 * Fri Dec 29 2017 Remi Collet <remi@remirepo.net> - 2.6.0-0.4.beta1
 - update to 2.6.0beta1
 
