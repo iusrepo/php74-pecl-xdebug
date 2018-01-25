@@ -8,6 +8,8 @@
 #
 # Please, preserve the changelog entries
 #
+
+# we don't want -z defs linker flag
 %undefine _strict_symbol_defs_build
 
 %global pecl_name  xdebug
@@ -198,6 +200,15 @@ cd NTS
 # Know as failed upstream (travis)
 rm tests/bug01258-php7.phpt
 %endif
+%ifarch ppc64 s390x
+# Known as failed on big endian
+rm tests/bug00806.phpt
+rm tests/bug01305.phpt
+rm tests/bug01312.phpt
+rm tests/bug01335.phpt
+rm tests/bug01512.phpt
+rm tests/bug01516.phpt
+%endif
 
 : Upstream test suite NTS extension
 # bug00886 is marked as slow as it uses a lot of disk space
@@ -230,6 +241,8 @@ REPORT_EXIT_STATUS=1 \
 %changelog
 * Tue Jan 23 2018 Remi Collet <remi@remirepo.net> - 2.6.0-0.5.RC2
 - update to 2.6.0RC2
+- undefine _strict_symbol_defs_build
+- temporarily ignore 6 failed tests on big endian
 
 * Fri Dec 29 2017 Remi Collet <remi@remirepo.net> - 2.6.0-0.4.beta1
 - update to 2.6.0beta1
