@@ -8,6 +8,7 @@
 #
 # Please, preserve the changelog entries
 #
+%undefine _strict_symbol_defs_build
 
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
