@@ -18,10 +18,10 @@
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 
-%global gh_commit  e53e2073568dc26a74b73479bff4e3fd88fe3ab2
+%global gh_commit  61690fbc6e7991f12c6a36bc72db9e0a145406e0
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 #global gh_date    20171018
-%global prever     RC2
+#global prever     RC2
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
@@ -32,7 +32,7 @@ Release:        0.5.%{prever}%{?dist}
 %if 0%{?gh_date:1}
 Release:        0.2.%{gh_date}.%{gh_short}%{?dist}
 %else
-Release:        3%{?dist}
+Release:        1%{?dist}
 %endif
 %endif
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{version}%{?prever}-%{gh_short}.tar.gz
@@ -196,20 +196,6 @@ done
 
 %if %{with_tests}
 cd NTS
-%if "%{php_version}" > "7.2"
-# Know as failed upstream (travis)
-rm tests/bug01258-php7.phpt
-%endif
-%ifarch ppc64 s390x
-# Known as failed on big endian
-rm tests/bug00806.phpt
-rm tests/bug01305.phpt
-rm tests/bug01312.phpt
-rm tests/bug01335.phpt
-rm tests/bug01512.phpt
-rm tests/bug01516.phpt
-%endif
-
 : Upstream test suite NTS extension
 # bug00886 is marked as slow as it uses a lot of disk space
 SKIP_SLOW_TESTS=1 \
@@ -239,6 +225,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Tue Jan 30 2018 Remi Collet <remi@remirepo.net> - 2.6.0-1
+- update to 2.6.0 (stable)
+
 * Tue Jan 23 2018 Remi Collet <remi@remirepo.net> - 2.6.0-0.5.RC2
 - update to 2.6.0RC2
 - undefine _strict_symbol_defs_build
