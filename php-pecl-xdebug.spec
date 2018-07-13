@@ -27,12 +27,12 @@ Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        2.6.0
 %if 0%{?prever:1}
-Release:        0.6.%{prever}%{?dist}
+Release:        0.7.%{prever}%{?dist}
 %else
 %if 0%{?gh_date:1}
-Release:        0.3.%{gh_date}.%{gh_short}%{?dist}
+Release:        0.4.%{gh_date}.%{gh_short}%{?dist}
 %else
-Release:        2%{?dist}
+Release:        3%{?dist}
 %endif
 %endif
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{version}%{?prever}-%{gh_short}.tar.gz
@@ -225,6 +225,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2.6.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
 * Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2.6.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
