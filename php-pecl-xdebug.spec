@@ -18,21 +18,21 @@
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 
-%global gh_commit  61690fbc6e7991f12c6a36bc72db9e0a145406e0
+%global gh_commit  97cc937cfeec707663bd6b1aa8d38d7cc98dd5cc
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 #global gh_date    20171018
 #global prever     RC2
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.6.0
+Version:        2.6.1
 %if 0%{?prever:1}
 Release:        0.7.%{prever}%{?dist}
 %else
 %if 0%{?gh_date:1}
 Release:        0.4.%{gh_date}.%{gh_short}%{?dist}
 %else
-Release:        3%{?dist}
+Release:        1%{?dist}
 %endif
 %endif
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{version}%{?prever}-%{gh_short}.tar.gz
@@ -196,6 +196,8 @@ done
 
 %if %{with_tests}
 cd NTS
+rm tests/bug00998-ipv6_localhost.phpt
+
 : Upstream test suite NTS extension
 # bug00886 is marked as slow as it uses a lot of disk space
 SKIP_SLOW_TESTS=1 \
@@ -225,6 +227,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Fri Aug 17 2018 Remi Collet <remi@remirepo.net> - 2.6.1-1
+- update to 2.6.1 (stable)
+
 * Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2.6.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
