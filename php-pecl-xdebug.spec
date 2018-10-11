@@ -14,28 +14,21 @@
 
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
+%global gh_commit  a264af33ac6cea474bd155d3c2d346f6d9dc88ac
+%global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 # XDebug should be loaded after opcache
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
-
-%global gh_commit  97cc937cfeec707663bd6b1aa8d38d7cc98dd5cc
-%global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
-#global gh_date    20171018
-#global prever     RC2
+%global upstream_version 2.7.0
+%global upstream_prever  beta1
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        2.6.1
-%if 0%{?prever:1}
-Release:        0.7.%{prever}%{?dist}
-%else
-%if 0%{?gh_date:1}
-Release:        0.4.%{gh_date}.%{gh_short}%{?dist}
-%else
+Version:        %{upstream_version}%{?upstream_prever:~%{upstream_prever}}
 Release:        1%{?dist}
-%endif
-%endif
-Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{version}%{?prever}-%{gh_short}.tar.gz
+Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{upstream_version}%{?upstream_prever}-%{gh_short}.tar.gz
+
+Patch0:         0001-zif_handler-exists-in-7.2.patch
 
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
@@ -76,30 +69,23 @@ Xdebug also provides:
 * code coverage analysis
 * capabilities to debug your scripts interactively with a debug client
 
+Documentation: https://xdebug.org/docs/
+
 
 %prep
 %setup -qc
 mv %{pecl_name}-%{gh_commit} NTS
-
-%if 0%{?gh_date:1}
-%{__php} -r '
-  $pkg = simplexml_load_file("NTS/package.xml");
-  $pkg->date = substr("%{gh_date}",0,4)."-".substr("%{gh_date}",4,2)."-".substr("%{gh_date}",6,2);
-  $pkg->version->release = "%{version}dev";
-  $pkg->stability->release = "devel";
-  $pkg->asXML("package.xml");
-'
-%else
 mv NTS/package.xml .
-%endif
 
 sed -e '/LICENSE/s/role="doc"/role="src"/' -i package.xml
 
 cd NTS
+%patch0 -p1
+
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
-if test "$ver" != "%{version}%{?prever}%{?gh_date:-dev}"; then
-   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{version}%{?prever}%{?gh_date:-dev}.
+if test "$ver" != "%{upstream_version}%{?upstream_prever}%{?gh_date:-dev}"; then
+   : Error: Upstream XDEBUG_VERSION version is ${ver}, expecting %{upstream_version}%{?upstream_perver}%{?gh_date:-dev}.
    exit 1
 fi
 cd ..
@@ -227,6 +213,11 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Fri Sep 21 2018 Remi Collet <remi@remirepo.net> - 2.7.0~beta1-1
+- update to 2.7.0beta1
+- add link to documentation in description and configuration file
+- open https://github.com/xdebug/xdebug/pull/431 zif_handler in 7.2
+
 * Fri Aug 17 2018 Remi Collet <remi@remirepo.net> - 2.6.1-1
 - update to 2.6.1 (stable)
 

@@ -1,0 +1,25 @@
+From 464804a13e49ce22b499ae0243657b2e4e32a4e2 Mon Sep 17 00:00:00 2001
+From: Remi Collet <remi@remirepo.net>
+Date: Fri, 21 Sep 2018 09:33:19 +0200
+Subject: [PATCH] zif_handler exists in 7.2
+
+---
+ xdebug_compat.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xdebug_compat.h b/xdebug_compat.h
+index ac8741bb..938b7074 100644
+--- a/xdebug_compat.h
++++ b/xdebug_compat.h
+@@ -75,7 +75,7 @@ zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
+ #  define XDEBUG_ZEND_CONSTANT_MODULE_NUMBER(v) ((v)->module_number)
+ # endif
+ 
+-# if PHP_VERSION_ID < 70300
++# if PHP_VERSION_ID < 70200
+ typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
+ # endif
+ 
+-- 
+2.14.4
+
