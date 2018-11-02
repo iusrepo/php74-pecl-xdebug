@@ -19,13 +19,17 @@
 # XDebug should be loaded after opcache
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
+# version/release
 %global upstream_version 2.7.0
 %global upstream_prever  beta1
+%global rpmrel           1
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        %{upstream_version}%{?upstream_prever:~%{upstream_prever}}
-Release:        1%{?dist}
+#Version:       %%{upstream_version}%%{?upstream_prever:~%%{upstream_prever}}
+#Release:       1%%{?dist}
+Version:        %{upstream_version}
+Release:        %{?upstream_prever:0.}%{rpmrel}%{?upstream_prever:.%{upstream_prever}}%{?dist}
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{upstream_version}%{?upstream_prever}-%{gh_short}.tar.gz
 
 Patch0:         0001-zif_handler-exists-in-7.2.patch
@@ -213,6 +217,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Fri Nov  2 2018 Remi Collet <remi@remirepo.net> - 2.7.0-0.1.beta1
+- rebuild
+
 * Fri Sep 21 2018 Remi Collet <remi@remirepo.net> - 2.7.0~beta1-1
 - update to 2.7.0beta1
 - add link to documentation in description and configuration file
