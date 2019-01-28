@@ -37,7 +37,6 @@ Patch0:         0001-zif_handler-exists-in-7.2.patch
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
 License:        PHP
-Group:          Development/Languages
 URL:            http://xdebug.org/
 
 BuildRequires:  php-pear  > 1.9.1
