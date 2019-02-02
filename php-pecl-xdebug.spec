@@ -29,7 +29,7 @@ Summary:        PECL package for debugging PHP scripts
 #Version:       %%{upstream_version}%%{?upstream_prever:~%%{upstream_prever}}
 #Release:       1%%{?dist}
 Version:        %{upstream_version}
-Release:        %{?upstream_prever:0.}%{rpmrel}%{?upstream_prever:.%{upstream_prever}}%{?dist}
+Release:        %{?upstream_prever:0.}%{rpmrel}%{?upstream_prever:.%{upstream_prever}}%{?dist}.1
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{upstream_version}%{?upstream_prever}-%{gh_short}.tar.gz
 
 Patch0:         0001-zif_handler-exists-in-7.2.patch
@@ -216,6 +216,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Sat Feb 02 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2.7.0-0.1.beta1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
 * Fri Nov  2 2018 Remi Collet <remi@remirepo.net> - 2.7.0-0.1.beta1
 - rebuild
 
