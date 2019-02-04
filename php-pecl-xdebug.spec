@@ -1,6 +1,6 @@
 # Fedora spec file for php-pecl-xdebug
 #
-# Copyright (c) 2010-2018 Remi Collet
+# Copyright (c) 2010-2019 Remi Collet
 # Copyright (c) 2006-2009 Christopher Stone
 #
 # License: MIT
@@ -14,25 +14,23 @@
 
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
-%global gh_commit  a264af33ac6cea474bd155d3c2d346f6d9dc88ac
+%global gh_commit  8c1aa33d1c630d59a464e9dcefc0d63ba627d0c8
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 # XDebug should be loaded after opcache
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 # version/release
 %global upstream_version 2.7.0
-%global upstream_prever  beta1
-%global rpmrel           1
+%global upstream_prever  rc1
+%global rpmrel           2
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 #Version:       %%{upstream_version}%%{?upstream_prever:~%%{upstream_prever}}
 #Release:       1%%{?dist}
 Version:        %{upstream_version}
-Release:        %{?upstream_prever:0.}%{rpmrel}%{?upstream_prever:.%{upstream_prever}}%{?dist}.1
+Release:        %{?upstream_prever:0.}%{rpmrel}%{?upstream_prever:.%{upstream_prever}}%{?dist}
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{upstream_version}%{?upstream_prever}-%{gh_short}.tar.gz
-
-Patch0:         0001-zif_handler-exists-in-7.2.patch
 
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
@@ -83,8 +81,6 @@ mv NTS/package.xml .
 sed -e '/LICENSE/s/role="doc"/role="src"/' -i package.xml
 
 cd NTS
-%patch0 -p1
-
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
 if test "$ver" != "%{upstream_version}%{?upstream_prever}%{?gh_date:-dev}"; then
@@ -216,6 +212,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Mon Feb  4 2019 Remi Collet <remi@remirepo.net> - 2.7.0-0.2.rc1
+- update to 2.7.0RC1
+
 * Sat Feb 02 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2.7.0-0.1.beta1.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
