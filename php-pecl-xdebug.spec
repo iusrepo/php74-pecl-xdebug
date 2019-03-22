@@ -14,22 +14,19 @@
 
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
-%global gh_commit  175b82fdedd555217ae32c9d1801af521ffca13b
+%global gh_commit  bc0b7471413e879bf969f38563124688d3e736fe
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 # XDebug should be loaded after opcache
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 # version/release
 %global upstream_version 2.7.0
-%global upstream_prever  RC2
-%global rpmrel           3
+#global upstream_prever  RC2
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-#Version:       %%{upstream_version}%%{?upstream_prever:~%%{upstream_prever}}
-#Release:       1%%{?dist}
-Version:        %{upstream_version}
-Release:        %{?upstream_prever:0.}%{rpmrel}%{?upstream_prever:.%{upstream_prever}}%{?dist}
+Version:        %{upstream_version}%{?upstream_prever:~%%{upstream_prever}}
+Release:        1%{?dist}
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{upstream_version}%{?upstream_prever}-%{gh_short}.tar.gz
 
 # The Xdebug License, version 1.01
@@ -212,6 +209,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Fri Mar 22 2019 Remi Collet <remi@remirepo.net> - 2.7.0-1
+- update to 2.7.0 (stable)
+
 * Thu Feb 21 2019 Remi Collet <remi@remirepo.net> - 2.7.0-0.3.RC2
 - update to 2.7.0RC2
 
