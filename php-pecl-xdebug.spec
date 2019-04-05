@@ -32,7 +32,7 @@ Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
 License:        PHP
-URL:            http://xdebug.org/
+URL:            https://xdebug.org/
 
 BuildRequires:  php-pear  > 1.9.1
 BuildRequires:  php-devel > 7
