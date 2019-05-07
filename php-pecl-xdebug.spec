@@ -14,13 +14,13 @@
 
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
-%global gh_commit  f71bf7db80d930cfb5b5de9bda16e408dd4165c6
+%global gh_commit  e4de4be71911ba933e4f9240dbcc3f45af53c6da
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 # XDebug should be loaded after opcache
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 # version/release
-%global upstream_version 2.7.1
+%global upstream_version 2.7.2
 #global upstream_prever  RC2
 
 Name:           php-pecl-xdebug
@@ -209,6 +209,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Tue May  7 2019 Remi Collet <remi@remirepo.net> - 2.7.2-1
+- update to 2.7.2
+
 * Fri Apr  5 2019 Remi Collet <remi@remirepo.net> - 2.7.1-1
 - update to 2.7.1
 
