@@ -30,6 +30,8 @@ Version:        %{upstream_version}%{?upstream_prever:~%{upstream_lower}}
 Release:        1%{?dist}
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{upstream_version}%{?upstream_prever}-%{gh_short}.tar.gz
 
+Patch0:         xdebug-build.patch
+
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
 License:        PHP
@@ -79,6 +81,8 @@ mv NTS/package.xml .
 sed -e '/LICENSE/s/role="doc"/role="src"/' -i package.xml
 
 cd NTS
+%patch0 -p1
+
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
 if test "$ver" != "%{upstream_version}%{?upstream_prever}%{?gh_date:-dev}"; then
@@ -212,6 +216,8 @@ REPORT_EXIT_STATUS=1 \
 %changelog
 * Wed Oct  2 2019 Remi Collet <remi@remirepo.net> - 2.8.0~beta2-1
 - update to 2.8.0beta2
+- add patch for bigendian from
+  https://github.com/xdebug/xdebug/pull/507
 
 * Fri Jul 26 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2.7.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
