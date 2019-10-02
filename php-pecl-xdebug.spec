@@ -14,19 +14,20 @@
 
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
-%global gh_commit  e4de4be71911ba933e4f9240dbcc3f45af53c6da
+%global gh_commit  f1bde951b797bd6669a5ba677d98214b5c3ac315
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 # XDebug should be loaded after opcache
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 # version/release
-%global upstream_version 2.7.2
-#global upstream_prever  RC2
+%global upstream_version 2.8.0
+%global upstream_prever  beta2
+%global upstream_lower   beta2
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
-Version:        %{upstream_version}%{?upstream_prever:~%%{upstream_prever}}
-Release:        2%{?dist}
+Version:        %{upstream_version}%{?upstream_prever:~%{upstream_lower}}
+Release:        1%{?dist}
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{upstream_version}%{?upstream_prever}-%{gh_short}.tar.gz
 
 # The Xdebug License, version 1.01
@@ -182,12 +183,12 @@ rm tests/bug00998-ipv6_localhost.phpt
 
 : Upstream test suite NTS extension
 # bug00886 is marked as slow as it uses a lot of disk space
-SKIP_SLOW_TESTS=1 \
+TEST_OPTS="-q -x --show-diff"
+
 TEST_PHP_EXECUTABLE=%{_bindir}/php \
-TEST_PHP_ARGS="-n $modules -d zend_extension=%{buildroot}%{php_extdir}/%{pecl_name}.so -d xdebug.auto_trace=0" \
-NO_INTERACTION=1 \
+TEST_PHP_ARGS="-n $modules -d zend_extension=%{buildroot}%{php_extdir}/%{pecl_name}.so -d xdebug.auto_trace=0 -d foo=yes" \
 REPORT_EXIT_STATUS=1 \
-%{__php} -n run-tests.php --show-diff
+%{__php} -n run-xdebug-tests.php $TEST_OPTS
 %else
 : Test suite disabled
 %endif
@@ -209,6 +210,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Wed Oct  2 2019 Remi Collet <remi@remirepo.net> - 2.8.0~beta2-1
+- update to 2.8.0beta2
+
 * Fri Jul 26 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2.7.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
