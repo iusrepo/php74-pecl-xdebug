@@ -27,7 +27,7 @@
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        %{upstream_version}%{?upstream_prever:~%{upstream_lower}}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{upstream_version}%{?upstream_prever}-%{gh_short}.tar.gz
 
 Patch0:         xdebug-build.patch
@@ -214,6 +214,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Thu Oct 03 2019 Remi Collet <remi@remirepo.net> - 2.8.0~beta2-2
+- rebuild for https://fedoraproject.org/wiki/Changes/php74
+
 * Wed Oct  2 2019 Remi Collet <remi@remirepo.net> - 2.8.0~beta2-1
 - update to 2.8.0beta2
 - add patch for bigendian from
