@@ -14,13 +14,13 @@
 
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
-%global gh_commit  1a7976906e8b003645d32a54dbd059ca7e2ed513
+%global gh_commit  cb3a3a4fdf841c53f36548237e81b81c8a57cdf1
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 # XDebug should be loaded after opcache
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 # version/release
-%global upstream_version 2.8.0
+%global upstream_version 2.8.1
 #global upstream_prever  beta2
 #global upstream_lower   beta2
 
@@ -29,6 +29,8 @@ Summary:        PECL package for debugging PHP scripts
 Version:        %{upstream_version}%{?upstream_prever:~%{upstream_lower}}
 Release:        1%{?dist}
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{upstream_version}%{?upstream_prever}-%{gh_short}.tar.gz
+
+Patch0:         https://github.com/xdebug/xdebug/commit/0654240f24f6f619074c205462dbefe9b175c122.patch
 
 # The Xdebug License, version 1.01
 # (Based on "The PHP License", version 3.0)
@@ -79,6 +81,8 @@ mv NTS/package.xml .
 sed -e '/LICENSE/s/role="doc"/role="src"/' -i package.xml
 
 cd NTS
+%patch0 -p1
+
 # Check extension version
 ver=$(sed -n '/XDEBUG_VERSION/{s/.* "//;s/".*$//;p}' php_xdebug.h)
 if test "$ver" != "%{upstream_version}%{?upstream_prever}%{?gh_date:-dev}"; then
@@ -210,6 +214,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Mon Dec  2 2019 Remi Collet <remi@remirepo.net> - 2.8.1-1
+- update to 2.8.1
+
 * Thu Oct 31 2019 Remi Collet <remi@remirepo.net> - 2.8.0-1
 - update to 2.8.0
 
