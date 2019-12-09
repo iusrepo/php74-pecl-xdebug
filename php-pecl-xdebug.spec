@@ -179,7 +179,6 @@ done
 
 %if %{with_tests}
 cd NTS
-rm tests/bug00998-ipv6_localhost.phpt
 
 : Upstream test suite NTS extension
 # bug00886 is marked as slow as it uses a lot of disk space
