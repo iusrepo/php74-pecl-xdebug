@@ -1,6 +1,6 @@
 # Fedora spec file for php-pecl-xdebug
 #
-# Copyright (c) 2010-2019 Remi Collet
+# Copyright (c) 2010-2020 Remi Collet
 # Copyright (c) 2006-2009 Christopher Stone
 #
 # License: MIT
@@ -14,13 +14,13 @@
 
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
-%global gh_commit  c60dd1ad245cd8fc4ea8520416cee21f3052ed96
+%global gh_commit  02890b34d419e6d0364946ddd904a0ebfbe92bca
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 # XDebug should be loaded after opcache
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 # version/release
-%global upstream_version 2.9.0
+%global upstream_version 2.9.1
 #global upstream_prever  beta2
 #global upstream_lower   beta2
 
@@ -36,7 +36,7 @@ License:        PHP
 URL:            https://xdebug.org/
 
 BuildRequires:  php-pear  > 1.9.1
-BuildRequires:  php-devel > 7
+BuildRequires:  php-devel > 7.1
 BuildRequires:  php-simplexml
 BuildRequires:  libedit-devel
 BuildRequires:  libtool
@@ -209,6 +209,10 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Thu Jan 16 2020 Remi Collet <remi@remirepo.net> - 2.9.1-1
+- update to 2.9.1
+- raise dependency on PHP 7.1
+
 * Mon Dec  9 2019 Remi Collet <remi@remirepo.net> - 2.9.0-1
 - update to 2.9.0
 
