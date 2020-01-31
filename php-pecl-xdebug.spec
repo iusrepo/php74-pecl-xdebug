@@ -14,20 +14,20 @@
 
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
-%global gh_commit  02890b34d419e6d0364946ddd904a0ebfbe92bca
+%global gh_commit  b626bc5c75bb28d99f289fbd9a86895cb11aeb29
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 # XDebug should be loaded after opcache
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 # version/release
-%global upstream_version 2.9.1
+%global upstream_version 2.9.2
 #global upstream_prever  beta2
 #global upstream_lower   beta2
 
 Name:           php-pecl-xdebug
 Summary:        PECL package for debugging PHP scripts
 Version:        %{upstream_version}%{?upstream_prever:~%{upstream_lower}}
-Release:        2%{?dist}
+Release:        1%{?dist}
 Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit}/%{pecl_name}-%{upstream_version}%{?upstream_prever}-%{gh_short}.tar.gz
 
 # The Xdebug License, version 1.01
@@ -209,6 +209,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Fri Jan 31 2020 Remi Collet <remi@remirepo.net> - 2.9.2-1
+- update to 2.9.2
+
 * Thu Jan 30 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.9.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
