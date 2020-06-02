@@ -14,13 +14,13 @@
 
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
-%global gh_commit  1f11f5a389cfcebf8e1ca64e092f75be9224abea
+%global gh_commit  b554fd406b365a0cec09e81200f16a2d30d59693
 %global gh_short   %(c=%{gh_commit}; echo ${c:0:7})
 # XDebug should be loaded after opcache
 %global ini_name   15-%{pecl_name}.ini
 %global with_tests 0%{!?_without_tests:1}
 # version/release
-%global upstream_version 2.9.5
+%global upstream_version 2.9.6
 #global upstream_prever  beta2
 #global upstream_lower   beta2
 
@@ -209,6 +209,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Sat May 30 2020 Remi Collet <remi@remirepo.net> - 2.9.6-1
+- update to 2.9.6
+
 * Mon Apr 27 2020 Remi Collet <remi@remirepo.net> - 2.9.5-1
 - update to 2.9.5
 
