@@ -1,3 +1,5 @@
+# IUS spec file for php74-pecl-xdebug, forked from:
+#
 # Fedora spec file for php-pecl-xdebug
 #
 # Copyright (c) 2010-2020 Remi Collet
@@ -12,6 +14,7 @@
 # we don't want -z defs linker flag
 %undefine _strict_symbol_defs_build
 
+%global php        php74
 %global pecl_name  xdebug
 %global with_zts   0%{!?_without_zts:%{?__ztsphp:1}}
 %global gh_commit  b554fd406b365a0cec09e81200f16a2d30d59693
@@ -24,7 +27,7 @@
 #global upstream_prever  beta2
 #global upstream_lower   beta2
 
-Name:           php-pecl-xdebug
+Name:           %{php}-pecl-%{pecl_name}
 Summary:        PECL package for debugging PHP scripts
 Version:        %{upstream_version}%{?upstream_prever:~%{upstream_lower}}
 Release:        1%{?dist}
@@ -35,9 +38,10 @@ Source0:        https://github.com/%{pecl_name}/%{pecl_name}/archive/%{gh_commit
 License:        PHP
 URL:            https://xdebug.org/
 
-BuildRequires:  php-pear  > 1.9.1
-BuildRequires:  php-devel > 7.1
-BuildRequires:  php-simplexml
+# build require  pear1's dependencies to avoid mismatched php stacks
+BuildRequires:  pear1 %{php}-cli %{php}-common %{php}-xml
+BuildRequires:  %{php}-devel
+BuildRequires:  %{php}-xml
 BuildRequires:  libedit-devel
 BuildRequires:  libtool
 
@@ -48,6 +52,11 @@ Provides:       php-%{pecl_name} = %{version}
 Provides:       php-%{pecl_name}%{?_isa} = %{version}
 Provides:       php-pecl(Xdebug) = %{version}
 Provides:       php-pecl(Xdebug)%{?_isa} = %{version}
+
+# safe replacement
+Provides:       php-pecl-%{pecl_name} = %{version}-%{release}
+Provides:       php-pecl-%{pecl_name}%{?_isa} = %{version}-%{release}
+Conflicts:      php-pecl-%{pecl_name} < %{version}-%{release}
 
 
 %description
@@ -106,14 +115,14 @@ cd NTS
 %configure \
     --enable-xdebug  \
     --with-php-config=%{_bindir}/php-config
-make %{?_smp_mflags}
+%make_build
 
 # Build debugclient
 pushd debugclient
 # buildconf required for aarch64 support
 ./buildconf
 %configure --with-libedit
-make %{?_smp_mflags}
+%make_build
 popd
 
 %if %{with_zts}
@@ -122,7 +131,7 @@ cd ../ZTS
 %configure \
     --enable-xdebug  \
     --with-php-config=%{_bindir}/zts-php-config
-make %{?_smp_mflags}
+%make_build
 %endif
 
 
@@ -135,7 +144,7 @@ install -Dpm 755 NTS/debugclient/debugclient \
         %{buildroot}%{_bindir}/debugclient
 
 # install package registration file
-install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
+install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{pecl_name}.xml
 
 # install config file
 install -Dpm 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
@@ -193,11 +202,29 @@ REPORT_EXIT_STATUS=1 \
 %endif
 
 
+%triggerin -- pear1
+if [ -x %{__pecl} ]; then
+    %{pecl_install} %{pecl_xmldir}/%{pecl_name}.xml >/dev/null || :
+fi
+
+
+%posttrans
+if [ -x %{__pecl} ]; then
+    %{pecl_install} %{pecl_xmldir}/%{pecl_name}.xml >/dev/null || :
+fi
+
+
+%postun
+if [ $1 -eq 0 -a -x %{__pecl} ]; then
+    %{pecl_uninstall} %{pecl_name} >/dev/null || :
+fi
+
+
 %files
 %license NTS/LICENSE
 %doc %{pecl_docdir}/%{pecl_name}
 %{_bindir}/debugclient
-%{pecl_xmldir}/%{name}.xml
+%{pecl_xmldir}/%{pecl_name}.xml
 
 %config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
@@ -209,6 +236,9 @@ REPORT_EXIT_STATUS=1 \
 
 
 %changelog
+* Fri Jun 05 2020 David Alger <davidmalger@gmail.com> - 2.9.6-1
+- Port from Fedora to IUS
+
 * Sat May 30 2020 Remi Collet <remi@remirepo.net> - 2.9.6-1
 - update to 2.9.6
 
